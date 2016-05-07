@@ -16,20 +16,21 @@ type Measurement struct {
 	// Timestamp records the time of the measurement.
 	Timestamp time.Time
 
-	// Dimensions capture metadata about the measurement.  They map to "fields" in
-	// InfluxDB. Unlikely IndexedDimensions, it's okay to include high cardinality
-	// values here, but queries on non-indexed dimensions will be slow.
-	//
-	// Example: {"requestid": "18af517b-004f-486c-9978-6cf60be7f1e9",
-	//           "ipv6": "2001:0db8:0a0b:12f0:0000:0000:0000:0001"}
-	Dimensions map[string]interface{}
-
-	// IndexedDimensions dimensions that are indexed. Indexed dimensions are best
-	// for bounded values with relatively small cardinality. They map to "tags" in
-	// InfluxDB.
+	// IndexedDimensions capture metadata about the measurement. IndexedDimensions
+	// are best for bounded values with relatively small cardinality. They map to
+	// "tags" in InfluxDB.
 	//
 	// Example: {"host": "myhost.mydomain.com", "total_cpus": "2"}
 	IndexedDimensions map[string]string
+
+	// UnindexedDimensions capture metadata about the measurement.  They map to
+	// "fields" in InfluxDB. Unlikely IndexedDimensions, it's okay to include
+	// high cardinality values here, but queries on UnindexedDimensions will be
+	// slow.
+	//
+	// Example: {"requestid": "18af517b-004f-486c-9978-6cf60be7f1e9",
+	//           "ipv6": "2001:0db8:0a0b:12f0:0000:0000:0000:0001"}
+	UnindexedDimensions map[string]interface{}
 
 	// Gauges represent a snapshot of a constantly shifting measurement at a point
 	// in time. During downsampling, we keep the most recent gauge for a given set
