@@ -5,7 +5,10 @@ import (
 )
 
 // Measurement represents a measurement at a point in time. It maps to a "point"
-// in InfluxDB.
+// in InfluxDB. borda collects Measurements and saves them to the database in
+// batches. During this process, borda may downsample Measurements by grouping
+// them by their Dimensions (including IndexedDimensions) and then using the
+// most recent Gauges and Counts and aggregating all Increments.
 type Measurement struct {
 	// Key is the name of the measurement (e.g. cpu_usage).
 	Key string
