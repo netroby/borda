@@ -14,13 +14,6 @@ var (
 	log = golog.LoggerFor("borda")
 )
 
-const (
-	FIELD_TYPE_INT    = 0
-	FIELD_TYPE_FLOAT  = 1
-	FIELD_TYPE_BOOL   = 2
-	FIELD_TYPE_STRING = 3
-)
-
 // Measurement represents a measurement at a point in time. It maps to a "point"
 // in InfluxDB.
 type Measurement struct {
@@ -47,6 +40,7 @@ type Measurement struct {
 	Fields map[string]interface{} `json:"fields,omitempty"`
 }
 
+// Collector collects Measurements
 type Collector interface {
 	// Submit submits a measurement to the Collector
 	Submit(*Measurement)
@@ -56,6 +50,7 @@ type Collector interface {
 	Wait() error
 }
 
+// Options configures a Collector.
 type Options struct {
 	// Dimensions identifies which fields should be treated as dimensions (tags
 	// in InfluxDB).
