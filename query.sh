@@ -15,14 +15,17 @@ function query() {
   echo ""
 }
 
-query "This query shows the raw data" \
-      'select * from health'
+#query "This query shows the raw data" \
+#      'select * from health'
 
-query "This query shows the raw data downsampled to 250ms" \
-      'select * from "default".health_250ms'
+query "This query shows the raw data downsampled to 1m" \
+      'select * from "default".health_1m'
 
 query "This query shows the downsampled data grouped by client. Notice how it becomes possible to correlate client and proxy errors" \
-      'select * from "default".health_250ms group by client'
+      'select * from "default".health_1m group by dim_client'
 
 query "This query shows how to capture aggregate data per proxy" \
-      'select * from "default".proxy_250ms'
+      'select * from "default".proxy_1m'
+
+query "This query shows how to capture aggregate data per client" \
+      'select * from "default".client_1m'
