@@ -1,6 +1,6 @@
 # Borda
 
-[![wercker status](https://app.wercker.com/status/5730f6cafc0c21e82e01b3db/m "wercker status")](https://app.wercker.com/project/bykey/5730f6cafc0c21e82e01b3db)
+[![wercker status](https://app.wercker.com/status/d63b521240d1cea1c2fb71061b9e3272/m "wercker status")](https://app.wercker.com/project/bykey/d63b521240d1cea1c2fb71061b9e3272)
 
 Borda, named after
 [Jean-Charles de Borda](https://en.wikipedia.org/wiki/Jean-Charles_de_Borda), is
