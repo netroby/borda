@@ -9,8 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"code.google.com/p/go-uuid/uuid"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,7 +38,7 @@ func TestRealWorldScenario(t *testing.T) {
 		User:           "test",
 		Pass:           "test",
 		BatchSize:      1000,
-		MaxBatchWindow: 250 * time.Millisecond,
+		MaxBatchWindow: 30 * time.Second,
 		MaxRetries:     100,
 		RetryInterval:  250 * time.Millisecond,
 	})
@@ -89,9 +87,11 @@ func TestRealWorldScenario(t *testing.T) {
 }
 
 const (
-	result_none  = 0
-	result_ok    = 200
-	result_error = 503
+	result_ok              = iota
+	result_none            = iota
+	result_mimic_apache    = iota
+	result_error           = iota
+	result_connect_timeout = iota
 )
 
 type request struct {
@@ -110,7 +110,8 @@ type proxy struct {
 func (p *proxy) run() {
 	p.requests = make(chan *request)
 	p.updateLoadAvg()
-	timer := time.NewTimer(25 * time.Millisecond)
+	loadAvgInterval := 5 * time.Second
+	timer := time.NewTimer(loadAvgInterval)
 	for {
 		select {
 		case req := <-p.requests:
@@ -124,7 +125,21 @@ func (p *proxy) run() {
 					Name: "health",
 					Ts:   time.Now(),
 					Fields: map[string]interface{}{
-						"proxy_error":       1000002,
+						"proxy_error":       "OriginConnectTimeout",
+						"proxy_error_count": 1,
+						"client":            req.client,
+						"proxy":             p.ip,
+						"request_id":        req.id,
+					},
+				})
+			} else if rand.Float64() > 0.95 {
+				// Simulate missing token
+				req.result <- result_mimic_apache
+				p.c.Submit(&Measurement{
+					Name: "health",
+					Ts:   time.Now(),
+					Fields: map[string]interface{}{
+						"proxy_error":       "MissingAuthToken",
 						"proxy_error_count": 1,
 						"client":            req.client,
 						"proxy":             p.ip,
@@ -148,7 +163,7 @@ func (p *proxy) run() {
 			}
 		case <-timer.C:
 			p.updateLoadAvg()
-			timer.Reset(25 * time.Millisecond)
+			timer.Reset(loadAvgInterval)
 		}
 	}
 }
@@ -166,66 +181,60 @@ func (p *proxy) updateLoadAvg() {
 }
 
 func runClient(id string, c Collector, proxies []*proxy) {
-	for {
-		time.Sleep(time.Duration(rand.Intn(200)) * time.Millisecond)
-		proxy := proxies[rand.Intn(len(proxies))]
-		req := &request{
-			id:     uuid.NewRandom().String(),
-			client: id,
-			result: make(chan int),
+	resultCodesToErrorCodes := map[int]string{
+		result_none:         "ChainedServerTimeout",
+		result_error:        "ChainedServerError",
+		result_mimic_apache: "ChainedServerError",
+	}
+	resultCounts := make(map[string]map[int]int)
+	recordResult := func(proxy *proxy, result int) {
+		countsForProxy := resultCounts[proxy.ip]
+		if countsForProxy == nil {
+			countsForProxy = make(map[int]int)
+			resultCounts[proxy.ip] = countsForProxy
 		}
-		proxy.requests <- req
+		countsForProxy[result] = countsForProxy[result] + 1
+	}
+
+	reportingInterval := 30 * time.Second
+	reportTimer := time.NewTimer(reportingInterval)
+	for {
 		select {
-		case result := <-req.result:
-			switch result {
-			case result_ok:
-				c.Submit(&Measurement{
-					Name: "health",
-					Ts:   time.Now(),
-					Fields: map[string]interface{}{
-						"client_success_count": 1,
-						"client":               id,
-						"proxy":                proxy.ip,
-						"request_id":           req.id,
-					},
-				})
-			case result_none:
-				c.Submit(&Measurement{
-					Name: "health",
-					Ts:   time.Now(),
-					Fields: map[string]interface{}{
-						"client_error":       2,
-						"client_error_count": 1,
-						"client":             id,
-						"proxy":              proxy.ip,
-						"request_id":         req.id,
-					},
-				})
-			case result_error:
-				c.Submit(&Measurement{
-					Name: "health",
-					Ts:   time.Now(),
-					Fields: map[string]interface{}{
-						"client_error":       3,
-						"client_error_count": 1,
-						"client":             id,
-						"proxy":              proxy.ip,
-						"request_id":         req.id,
-					},
-				})
+		case <-time.After(time.Duration(rand.Intn(200)) * time.Millisecond):
+			// Simulate a request
+			proxy := proxies[rand.Intn(len(proxies))]
+			req := &request{
+				client: id,
+				result: make(chan int),
 			}
-		case <-time.After(25 * time.Millisecond):
-			c.Submit(&Measurement{
-				Name: "health",
-				Ts:   time.Now(),
-				Fields: map[string]interface{}{
-					"client_error":       1,
-					"client_error_count": 1,
-					"client":             id,
-					"proxy":              proxy.ip,
-					"request_id":         req.id,
-				},
-			})
+			proxy.requests <- req
+			select {
+			case result := <-req.result:
+				recordResult(proxy, result)
+			case <-time.After(25 * time.Millisecond):
+				recordResult(proxy, result_connect_timeout)
+			}
+		case <-reportTimer.C:
+			// Simulate pre-aggregated reporting of results
+			for ip, countsForProxy := range resultCounts {
+				for result, count := range countsForProxy {
+					m := &Measurement{
+						Name: "health",
+						Ts:   time.Now(),
+						Fields: map[string]interface{}{
+							"client": id,
+							"proxy":  ip,
+						},
+					}
+					if result == result_ok {
+						m.Fields["client_success_count"] = count
+					} else {
+						m.Fields["client_error_count"] = count
+						m.Fields["client_error"] = resultCodesToErrorCodes[result]
+					}
+					c.Submit(m)
+				}
+			}
 		}
 	}
 }

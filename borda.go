@@ -213,9 +213,11 @@ func (c *collector) run() {
 						default:
 							stringValue = fmt.Sprint(v)
 						}
-						tags["dim_"+key] = stringValue
+						tags[key] = stringValue
+						fields["_"+key] = value
+					} else {
+						fields[key] = value
 					}
-					fields[key] = value
 				}
 			}
 			point, err := client.NewPoint(m.Name, tags, fields, m.Ts)

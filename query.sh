@@ -22,7 +22,7 @@ query "This query shows the raw data downsampled to 1m" \
       'select * from "default".health_1m'
 
 query "This query shows the downsampled data grouped by client. Notice how it becomes possible to correlate client and proxy errors" \
-      'select * from "default".health_1m group by dim_client'
+      'select * from "default".health_1m group by client'
 
 query "This query shows how to capture aggregate data per proxy" \
       'select * from "default".proxy_1m'
