@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	numProxies       = 20
-	numClients       = 200
+	numProxies       = 100
+	numClients       = 1000
 	proxiesPerClient = 2
 )
 
@@ -59,8 +59,9 @@ func TestRealWorldScenario(t *testing.T) {
 	proxies := make([]*proxy, 0, numProxies)
 	for i := 0; i < numProxies; i++ {
 		proxy := &proxy{
-			c:  c,
-			ip: fmt.Sprintf("43.25.23.%d", i),
+			c:       c,
+			ip:      fmt.Sprintf("43.25.23.%d", i),
+			loadAvg: float64(i%18) * 0.05, // bias the loadAvg
 		}
 		go proxy.run()
 		proxies = append(proxies, proxy)
@@ -118,11 +119,11 @@ func (p *proxy) run() {
 			if p.loadAvg > 0.9 && rand.Float64() > 0.5 {
 				// Simulate no response
 				req.result <- result_none
-			} else if rand.Float64() > 0.9 {
+			} else if rand.Float64() > 0.99 {
 				// Simulate error connecting downstream
 				req.result <- result_error
 				p.c.Submit(&Measurement{
-					Name: "health",
+					Name: "proxy_results",
 					Ts:   time.Now(),
 					Fields: map[string]interface{}{
 						"proxy_error":       "OriginConnectTimeout",
@@ -132,11 +133,11 @@ func (p *proxy) run() {
 						"request_id":        req.id,
 					},
 				})
-			} else if rand.Float64() > 0.95 {
+			} else if rand.Float64() > 0.99 {
 				// Simulate missing token
 				req.result <- result_mimic_apache
 				p.c.Submit(&Measurement{
-					Name: "health",
+					Name: "proxy_results",
 					Ts:   time.Now(),
 					Fields: map[string]interface{}{
 						"proxy_error":       "MissingAuthToken",
@@ -146,12 +147,12 @@ func (p *proxy) run() {
 						"request_id":        req.id,
 					},
 				})
-			} else if rand.Float64() > 0.9 {
+			} else if rand.Float64() > 0.99 {
 				// Simulate timeout by doing nothing
 			} else {
 				req.result <- result_ok
 				p.c.Submit(&Measurement{
-					Name: "health",
+					Name: "proxy_results",
 					Ts:   time.Now(),
 					Fields: map[string]interface{}{
 						"proxy_success_count": 1,
@@ -169,9 +170,14 @@ func (p *proxy) run() {
 }
 
 func (p *proxy) updateLoadAvg() {
-	p.loadAvg = rand.Float64()
+	// Simulate random walk of loadAvg
+	delta := (0.5 - rand.Float64()) / 10
+	p.loadAvg = p.loadAvg + delta
+	if p.loadAvg < 0 {
+		p.loadAvg = 0
+	}
 	p.c.Submit(&Measurement{
-		Name: "health",
+		Name: "proxy_health",
 		Ts:   time.Now(),
 		Fields: map[string]interface{}{
 			"proxy":    p.ip,
@@ -219,7 +225,7 @@ func runClient(id string, c Collector, proxies []*proxy) {
 			for ip, countsForProxy := range resultCounts {
 				for result, count := range countsForProxy {
 					m := &Measurement{
-						Name: "health",
+						Name: "client_results",
 						Ts:   time.Now(),
 						Fields: map[string]interface{}{
 							"client": id,

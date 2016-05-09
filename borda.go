@@ -195,7 +195,8 @@ func (c *collector) run() {
 	for {
 		select {
 		case m := <-c.in:
-			// Create a point and add to batch
+			// Create a point for the original measurement key and a point for the
+			// combined measurement.
 			tags := make(map[string]string, len(c.Dimensions))
 			fields := make(map[string]interface{}, len(m.Fields))
 			for key, value := range m.Fields {
@@ -215,14 +216,15 @@ func (c *collector) run() {
 					}
 				}
 			}
-			point, err := client.NewPoint(m.Name, tags, fields, m.Ts)
+			tags["orig_measurement"] = m.Name
+			point, err := client.NewPoint("combined", tags, fields, m.Ts)
 			if err != nil {
-				log.Errorf("Unable to add point to batch: %v", err)
+				log.Errorf("Unable to create point: %v", err)
 				continue
 			}
 			batch.AddPoint(point)
 			batchSize++
-			if batchSize == c.BatchSize {
+			if batchSize >= c.BatchSize {
 				err := commitBatch()
 				if err != nil {
 					c.terminate(err)
