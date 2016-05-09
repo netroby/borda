@@ -40,14 +40,36 @@ type Measurement struct {
 	Fields map[string]interface{} `json:"fields,omitempty"`
 }
 
+// WriteFunc is a function that writes a batch to the database
+type WriteFunc func(client.BatchPoints) error
+
+// InfluxWriter creates a WriteFunc that writes to InfluxDB
+func InfluxWriter(
+	influxURL string, // identifies the url to the InfluxDB server
+	user string, // the InfluxDB username
+	pass string, // the InfluxDB password
+) (WriteFunc, error) {
+	var err error
+	influx, err := client.NewHTTPClient(client.HTTPConfig{
+		Addr:     influxURL,
+		Username: user,
+		Password: pass,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("Unable to create InfluxDB client: %v", err)
+	}
+	return influx.Write, nil
+}
+
 // Collector collects Measurements
 type Collector interface {
 	// Submit submits a measurement to the Collector
 	Submit(*Measurement)
 
-	// Wait waits for the Collector to finish running and returns the error that
-	// caused the Collector to terminate.
-	Wait() error
+	// Wait waits up to timeout for the Collector to finish running and returns
+	// the error that caused the Collector to terminate. A timeout of -1 causes
+	// Wait to block indefinitely.
+	Wait(timeout time.Duration) error
 }
 
 // Options configures a Collector.
@@ -56,17 +78,12 @@ type Options struct {
 	// in InfluxDB).
 	Dimensions []string
 
-	// InfluxURL identifies the url to the InfluxDB server
-	InfluxURL string
+	// WriteToDatabase is a function that writes a batch to the database. If
+	// specified, the influx connection parameters are ignored
+	WriteToDatabase WriteFunc
 
 	// DBName identifies the name of the InfluxDB database
 	DBName string
-
-	// User is the InfluxDB username
-	User string
-
-	// Pass is the InfluxDB password
-	Pass string
 
 	// BatchSize is the number of measurements to include in a batch before
 	// writing it. If BatchSize is not specified, it defaults to 1000.
@@ -91,11 +108,10 @@ type collector struct {
 	dimensionNames map[string]bool
 	in             chan *Measurement
 	finalError     eventual.Value
-	influx         client.Client
 }
 
 // NewCollector creates and starts a new Collector
-func NewCollector(opts *Options) (Collector, error) {
+func NewCollector(opts *Options) Collector {
 	if opts.BatchSize == 0 {
 		opts.BatchSize = 1000
 	}
@@ -119,27 +135,16 @@ func NewCollector(opts *Options) (Collector, error) {
 		c.dimensionNames[dim] = true
 	}
 
-	var err error
-	c.influx, err = client.NewHTTPClient(client.HTTPConfig{
-		Addr:     c.InfluxURL,
-		Username: c.User,
-		Password: c.Pass,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("Unable to create InfluxDB client: %v", err)
-	}
-
 	go c.run()
-
-	return c, nil
+	return c
 }
 
 func (c *collector) Submit(m *Measurement) {
 	c.in <- m
 }
 
-func (c *collector) Wait() error {
-	err, _ := c.finalError.Get(-1)
+func (c *collector) Wait(timeout time.Duration) error {
+	err, _ := c.finalError.Get(timeout)
 	if err != nil {
 		return err.(error)
 	}
@@ -173,7 +178,7 @@ func (c *collector) run() {
 		}
 		retries := 0
 		for {
-			err := c.influx.Write(batch)
+			err := c.WriteToDatabase(batch)
 			if err == nil {
 				return newBatch()
 			}

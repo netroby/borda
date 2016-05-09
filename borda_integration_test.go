@@ -31,20 +31,20 @@ func TestRealWorldScenario(t *testing.T) {
 		log.Errorf("Unable to drop database: %v", string(out))
 	}
 
-	c, err := NewCollector(&Options{
-		Dimensions:     []string{"request_id", "client_error", "proxy_error", "client", "proxy"},
-		InfluxURL:      "http://localhost:8086",
-		DBName:         "lantern",
-		User:           "test",
-		Pass:           "test",
-		BatchSize:      1000,
-		MaxBatchWindow: 30 * time.Second,
-		MaxRetries:     100,
-		RetryInterval:  250 * time.Millisecond,
-	})
-	if !assert.NoError(t, err, "Unable to create Collector") {
+	write, err := InfluxWriter("http://localhost:8086", "test", "test")
+	if !assert.NoError(t, err, "Unable to create InfluxWriter") {
 		return
 	}
+
+	c := NewCollector(&Options{
+		Dimensions:      []string{"request_id", "client_error", "proxy_error", "client", "proxy"},
+		WriteToDatabase: write,
+		DBName:          "lantern",
+		BatchSize:       1000,
+		MaxBatchWindow:  30 * time.Second,
+		MaxRetries:      100,
+		RetryInterval:   250 * time.Millisecond,
+	})
 
 	// Create the database
 	out, err = exec.Command("./create_database.sh").Output()
