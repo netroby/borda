@@ -26,7 +26,7 @@ func init() {
 // TestRealWorldScenario simulates real-world scenarios of clients and servers.
 func TestRealWorldScenario(t *testing.T) {
 	// Drop the database
-	out, err := exec.Command("./drop_database.sh").Output()
+	out, err := exec.Command("./drop_database.bash").Output()
 	if err != nil {
 		log.Errorf("Unable to drop database: %v", string(out))
 	}
@@ -47,7 +47,7 @@ func TestRealWorldScenario(t *testing.T) {
 	})
 
 	// Create the database
-	out, err = exec.Command("./create_database.sh").Output()
+	out, err = exec.Command("./create_database.bash").Output()
 	if !assert.NoError(t, err, "Unable to create database: %v", string(out)) {
 		return
 	}
@@ -78,10 +78,10 @@ func TestRealWorldScenario(t *testing.T) {
 	// Wait for some data to get generated
 	time.Sleep(5 * time.Minute)
 
-	out, err = exec.Command("./drop_cqs.sh").Output()
+	out, err = exec.Command("./drop_cqs.bash").Output()
 	assert.NoError(t, err, "Unable to drop continuous queries: %v", string(out))
 
-	out, err = exec.Command("./query.sh").Output()
+	out, err = exec.Command("./query.bash").Output()
 	if assert.NoError(t, err, "Unable to run queries: %v", string(out)) {
 		t.Log(string(out))
 	}
