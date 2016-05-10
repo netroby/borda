@@ -44,8 +44,8 @@ integration-test:
     - script:
       name: influx install
       code: |
-        wget https://dl.influxdata.com/influxdb/releases/influxdb_0.11.1-1_amd64.deb
-        sudo dpkg -i influxdb_0.11.1-1_amd64.deb
+        wget https://dl.influxdata.com/influxdb/releases/influxdb_0.12.2-1_amd64.deb
+        sudo dpkg -i influxdb_0.12.2-1_amd64.deb
         influxd &
     - wercker/setup-go-workspace:
       package-dir: github.com/getlantern/borda

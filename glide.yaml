@@ -4,6 +4,6 @@ import:
 - package: github.com/getlantern/golog
 - package: github.com/stretchr/testify/assert
 - package: github.com/influxdata/influxdb
-  version: 0.11
+  version: 0.12
   subpackages:
   - client/v2
