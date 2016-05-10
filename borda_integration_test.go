@@ -37,7 +37,7 @@ func TestRealWorldScenario(t *testing.T) {
 	}
 
 	c := NewCollector(&Options{
-		Dimensions:      []string{"request_id", "client_error", "proxy_error", "client", "proxy"},
+		Dimensions:      []string{"request_id", "client_error", "proxy_error", "client", "proxy", "browser", "os", "os_version", "client_version", "randomserverthing"},
 		WriteToDatabase: write,
 		DBName:          "lantern",
 		BatchSize:       1000,
@@ -96,7 +96,6 @@ const (
 )
 
 type request struct {
-	id     string
 	client string
 	result chan int
 }
@@ -130,7 +129,7 @@ func (p *proxy) run() {
 						"proxy_error_count": 1,
 						"client":            req.client,
 						"proxy":             p.ip,
-						"request_id":        req.id,
+						"randomserverthing": rand.Intn(10),
 					},
 				})
 			} else if rand.Float64() > 0.99 {
@@ -144,7 +143,7 @@ func (p *proxy) run() {
 						"proxy_error_count": 1,
 						"client":            req.client,
 						"proxy":             p.ip,
-						"request_id":        req.id,
+						"randomserverthing": rand.Intn(10),
 					},
 				})
 			} else if rand.Float64() > 0.99 {
@@ -158,7 +157,7 @@ func (p *proxy) run() {
 						"proxy_success_count": 1,
 						"client":              req.client,
 						"proxy":               p.ip,
-						"request_id":          req.id,
+						"randomserverthing":   rand.Intn(10),
 					},
 				})
 			}
@@ -228,8 +227,12 @@ func runClient(id string, c Collector, proxies []*proxy) {
 						Name: "client_results",
 						Ts:   time.Now(),
 						Fields: map[string]interface{}{
-							"client": id,
-							"proxy":  ip,
+							"client":         id,
+							"proxy":          ip,
+							"browser":        "chrome",
+							"os":             "windows",
+							"os_version":     7 + rand.Intn(3),
+							"client_version": fmt.Sprintf("2.2.%d", rand.Intn(9)),
 						},
 					}
 					if result == result_ok {
