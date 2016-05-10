@@ -72,25 +72,25 @@ func TestHTTPRoundTrip(t *testing.T) {
 	})
 	go http.Serve(hl, c)
 
-	resp, _ := request(httpAddr, badContentType, good)
+	resp, _ := httpRequest(httpAddr, badContentType, good)
 	assert.Equal(t, http.StatusUnsupportedMediaType, resp.StatusCode)
 
-	resp, _ = request(httpAddr, goodContentType, missingName)
+	resp, _ = httpRequest(httpAddr, goodContentType, missingName)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = request(httpAddr, goodContentType, missingTS)
+	resp, _ = httpRequest(httpAddr, goodContentType, missingTS)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = request(httpAddr, goodContentType, missingFields)
+	resp, _ = httpRequest(httpAddr, goodContentType, missingFields)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = request(httpAddr, goodContentType, emptyFields)
+	resp, _ = httpRequest(httpAddr, goodContentType, emptyFields)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = request(httpAddr, goodContentType, nil)
+	resp, _ = httpRequest(httpAddr, goodContentType, nil)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = request(httpAddr, goodContentType, good)
+	resp, _ = httpRequest(httpAddr, goodContentType, good)
 	if !assert.Equal(t, http.StatusCreated, resp.StatusCode) {
 		return
 	}
@@ -101,7 +101,7 @@ func TestHTTPRoundTrip(t *testing.T) {
 	}
 }
 
-func request(addr string, contentType string, m *Measurement) (*http.Response, error) {
+func httpRequest(addr string, contentType string, m *Measurement) (*http.Response, error) {
 	client := &http.Client{}
 	b := new(bytes.Buffer)
 	if m == nil {
