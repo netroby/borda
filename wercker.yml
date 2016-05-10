@@ -18,16 +18,23 @@ build:
     - wercker/setup-go-workspace:
       package-dir: github.com/getlantern/borda
     - script:
-      name: go get
+      name: glide install
       code: |
-        go get -t ./...
+        cd /tmp
+        curl -L https://github.com/Masterminds/glide/releases/download/0.10.2/glide-0.10.2-linux-amd64.tar.gz -o glide.tar.gz
+        tar -xf glide.tar.gz
+        sudo mv linux-amd64/glide /usr/local/bin/
+    - script:
+      name: glide update
+      code: |
+        glide update
     # Build the project
     - script:
       name: go build
       code: |
-        go build ./...
+        go build .
     # Test the project
     - script:
       name: go test -race
       code: |
-        go test -race ./...
+        go test -race .
