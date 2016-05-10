@@ -74,31 +74,7 @@ func doTest(t *testing.T, buildCollector func(WriteFunc) Collector) (bool, error
 		if atomic.AddInt32(&i, 1) < 3 {
 			return fmt.Errorf("Failed on try %d", i)
 		}
-		assert.Equal(t, dbName, batch.Database(), "Incorrect database name")
-		assert.Len(t, batch.Points(), 1, "Incorrect batch size")
-		point := batch.Points()[0]
-		assert.Equal(t, "combined", point.Name(), "Incorrect measurement key")
-		assert.NotNil(t, point.Time(), "Missing timestamp")
-		assert.Equal(t, map[string]string{
-			// Original dimensions, all are strings
-			"dim_string": "a",
-			"dim_int":    "1",
-
-			// Synthetic field capturing original measurement key
-			"orig_measurement": "mymeasure",
-		}, point.Tags(), "Incorrect tags")
-		assert.Equal(t, map[string]interface{}{
-			// Original fields
-			"field_int":    int64(2),
-			"field_float":  float64(2.1),
-			"field_bool":   true,
-			"field_string": "stringy",
-
-			// Synthetic fields for dimensions
-			"_dim_string": "a",
-			"_dim_int":    int64(1),
-		}, point.Fields(), "Incorrect fields")
-
+		validateBatch(t, false, batch)
 		done.Set(true)
 		return nil
 	}
@@ -128,4 +104,39 @@ func doTest(t *testing.T, buildCollector func(WriteFunc) Collector) (bool, error
 		timeout = 0
 	}
 	return ok, c.Wait(timeout)
+}
+
+func validateBatch(t *testing.T, allFloats bool, batch client.BatchPoints) {
+	assert.Equal(t, dbName, batch.Database(), "Incorrect database name")
+	assert.Len(t, batch.Points(), 1, "Incorrect batch size")
+	point := batch.Points()[0]
+	assert.Equal(t, "combined", point.Name(), "Incorrect measurement key")
+	assert.NotNil(t, point.Time(), "Missing timestamp")
+	assert.Equal(t, map[string]string{
+		// Original dimensions, all are strings
+		"dim_string": "a",
+		"dim_int":    "1",
+
+		// Synthetic field capturing original measurement key
+		"orig_measurement": "mymeasure",
+	}, point.Tags(), "Incorrect tags")
+
+	var dimI interface{} = int64(1)
+	var i interface{} = int64(2)
+	if allFloats {
+		dimI = float64(1)
+		i = float64(2)
+	}
+
+	assert.Equal(t, map[string]interface{}{
+		// Original fields
+		"field_int":    i,
+		"field_float":  float64(2.1),
+		"field_bool":   true,
+		"field_string": "stringy",
+
+		// Synthetic fields for dimensions
+		"_dim_string": "a",
+		"_dim_int":    dimI,
+	}, point.Fields(), "Incorrect fields")
 }

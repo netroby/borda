@@ -3,6 +3,7 @@ package borda
 import (
 	"fmt"
 	"math"
+	"net/http"
 	"time"
 
 	"github.com/getlantern/eventual"
@@ -63,6 +64,8 @@ func InfluxWriter(
 
 // Collector collects Measurements
 type Collector interface {
+	http.Handler
+
 	// Submit submits a measurement to the Collector
 	Submit(*Measurement)
 
