@@ -20,9 +20,9 @@ var (
 	certfile      = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
 	dims          = flag.String("dimensions", "request_id,client_error,proxy_error,client,proxy", "Dimensions")
 	influxurl     = flag.String("influxurl", "http://localhost:8086", "InfluxDB URL")
-	influxuser    = flag.String("influxuser", "lantern", "InfluxDB username")
+	influxdb      = flag.String("influxdb", "lantern2", "InfluxDB database name")
+	influxuser    = flag.String("influxuser", "lantern2", "InfluxDB username")
 	influxpass    = flag.String("influxpass", "", "InfluxDB password")
-	db            = flag.String("db", "lantern", "InfluxDB database name")
 	batchsize     = flag.Int("batchsize", 1000, "Batch size")
 	batchwindow   = flag.Duration("batchwindow", 30*time.Second, "Batch window")
 	maxretries    = flag.Int("maxretries", 100, "Maximum retries to write to InfluxDB before giving up")
@@ -52,7 +52,7 @@ func main() {
 	c := borda.NewCollector(&borda.Options{
 		Dimensions:      strings.Split(*dims, ","),
 		WriteToDatabase: write,
-		DBName:          *db,
+		DBName:          *influxdb,
 		BatchSize:       *batchsize,
 		MaxBatchWindow:  *batchwindow,
 		MaxRetries:      *maxretries,
