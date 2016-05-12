@@ -9,6 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/glog"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,7 +30,7 @@ func TestRealWorldScenario(t *testing.T) {
 	// Drop the database
 	out, err := exec.Command("./drop_database.bash").Output()
 	if err != nil {
-		log.Errorf("Unable to drop database: %v", string(out))
+		glog.Errorf("Unable to drop database: %v", string(out))
 	}
 
 	write, err := InfluxWriter("http://localhost:8086", "test", "test")

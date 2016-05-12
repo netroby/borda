@@ -7,12 +7,8 @@ import (
 	"time"
 
 	"github.com/getlantern/eventual"
-	"github.com/getlantern/golog"
+	"github.com/golang/glog"
 	"github.com/influxdata/influxdb/client/v2"
-)
-
-var (
-	log = golog.LoggerFor("borda")
 )
 
 // Measurement represents a measurement at a point in time. It maps to a "point"
@@ -43,24 +39,6 @@ type Measurement struct {
 
 // WriteFunc is a function that writes a batch to the database
 type WriteFunc func(client.BatchPoints) error
-
-// InfluxWriter creates a WriteFunc that writes to InfluxDB
-func InfluxWriter(
-	influxURL string, // identifies the url to the InfluxDB server
-	user string, // the InfluxDB username
-	pass string, // the InfluxDB password
-) (WriteFunc, error) {
-	var err error
-	influx, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr:     influxURL,
-		Username: user,
-		Password: pass,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("Unable to create InfluxDB client: %v", err)
-	}
-	return influx.Write, nil
-}
 
 // Collector collects Measurements
 type Collector interface {
@@ -188,7 +166,7 @@ func (c *collector) run() {
 			if retries >= c.MaxRetries {
 				return fmt.Errorf("Unable to commit batch, not retrying: %v", err)
 			}
-			log.Errorf("Unable to commit batch, retrying: %v", err)
+			glog.Errorf("Unable to commit batch, retrying: %v", err)
 			retries++
 			time.Sleep(c.RetryInterval)
 		}
@@ -227,7 +205,7 @@ func (c *collector) run() {
 			tags["orig_measurement"] = m.Name
 			point, err := client.NewPoint("combined", tags, fields, m.Ts)
 			if err != nil {
-				log.Errorf("Unable to create point: %v", err)
+				glog.Errorf("Unable to create point: %v", err)
 				continue
 			}
 			batch.AddPoint(point)
