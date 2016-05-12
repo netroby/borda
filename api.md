@@ -1,5 +1,5 @@
 FORMAT: 1A
-HOST: https://borda.lantern.io
+HOST: https://borda.getlantern.org
 
 # borda
 
