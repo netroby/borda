@@ -35,7 +35,9 @@ This publishes a measurement.
                   "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36",
                   "os": "Windows",
                   "os_version": 10,
-                  "lantern_version": "2.2.0 (20160413.044024)"
+                  "lantern_version": "2.2.0 (20160413.044024)",
+                  "num_errors": 5,
+                  "num_successes": 987,
                 }
             }
 
