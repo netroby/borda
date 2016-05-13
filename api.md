@@ -6,6 +6,10 @@ HOST: https://borda.getlantern.org
 borda is an API for publishing measurements to Lantern's influxdb measurements
 repository. One can domain front to borda using https://d157vud77ygy87.cloudfront.net.
 
+There's a [postman.dump](postman.dump) available for use with the
+[Postman](https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en)
+HTTP test utility.
+
 ## Group Measurement
 
 ## Measurements [/measurements]
