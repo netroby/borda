@@ -37,7 +37,7 @@ This publishes a measurement.
                   "os_version": 10,
                   "lantern_version": "2.2.0 (20160413.044024)",
                   "num_errors": 5,
-                  "num_successes": 987,
+                  "num_successes": 987
                 }
             }
 
