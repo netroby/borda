@@ -37,6 +37,11 @@ func (c *collector) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if len(measurements) == 0 {
+		badRequest(resp, "Please include at least 1 measurement", err)
+		return
+	}
+
 	for _, m := range measurements {
 		if m.Name == "" {
 			badRequest(resp, "Missing name")

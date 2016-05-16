@@ -72,25 +72,28 @@ func TestHTTPRoundTrip(t *testing.T) {
 	})
 	go http.Serve(hl, c)
 
-	resp, _ := httpRequest(httpAddr, badContentType, good)
+	resp, _ := httpRequest(httpAddr, badContentType, []*Measurement{good})
 	assert.Equal(t, http.StatusUnsupportedMediaType, resp.StatusCode)
 
-	resp, _ = httpRequest(httpAddr, goodContentType, missingName)
+	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{missingName})
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = httpRequest(httpAddr, goodContentType, missingTS)
+	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{missingTS})
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = httpRequest(httpAddr, goodContentType, missingFields)
+	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{missingFields})
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = httpRequest(httpAddr, goodContentType, emptyFields)
+	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{emptyFields})
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	resp, _ = httpRequest(httpAddr, goodContentType, nil)
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = httpRequest(httpAddr, goodContentType, good)
+	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{})
+	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{good})
 	if !assert.Equal(t, http.StatusCreated, resp.StatusCode) {
 		return
 	}
@@ -101,13 +104,13 @@ func TestHTTPRoundTrip(t *testing.T) {
 	}
 }
 
-func httpRequest(addr string, contentType string, m *Measurement) (*http.Response, error) {
+func httpRequest(addr string, contentType string, measurements []*Measurement) (*http.Response, error) {
 	client := &http.Client{}
 	b := new(bytes.Buffer)
-	if m == nil {
+	if measurements == nil {
 		b.Write([]byte("Not valid JSON"))
 	} else {
-		err := json.NewEncoder(b).Encode([]*Measurement{m})
+		err := json.NewEncoder(b).Encode(measurements)
 		if err != nil {
 			return nil, err
 		}
