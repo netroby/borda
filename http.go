@@ -30,29 +30,33 @@ func (c *collector) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	dec := json.NewDecoder(req.Body)
-	m := &Measurement{}
-	err := dec.Decode(m)
+	var measurements []*Measurement
+	err := dec.Decode(&measurements)
 	if err != nil {
 		badRequest(resp, "Error decoding JSON: %v", err)
 		return
 	}
 
-	if m.Name == "" {
-		badRequest(resp, "Missing name")
-		return
+	for _, m := range measurements {
+		if m.Name == "" {
+			badRequest(resp, "Missing name")
+			return
+		}
+
+		if m.Ts.IsZero() {
+			badRequest(resp, "Missing ts")
+			return
+		}
+
+		if m.Fields == nil || len(m.Fields) == 0 {
+			badRequest(resp, "Need at least one field")
+			return
+		}
 	}
 
-	if m.Ts.IsZero() {
-		badRequest(resp, "Missing ts")
-		return
+	for _, m := range measurements {
+		c.Submit(m)
 	}
-
-	if m.Fields == nil || len(m.Fields) == 0 {
-		badRequest(resp, "Need at least one field")
-		return
-	}
-
-	c.Submit(m)
 
 	resp.WriteHeader(http.StatusCreated)
 }

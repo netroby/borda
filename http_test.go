@@ -107,7 +107,7 @@ func httpRequest(addr string, contentType string, m *Measurement) (*http.Respons
 	if m == nil {
 		b.Write([]byte("Not valid JSON"))
 	} else {
-		err := json.NewEncoder(b).Encode(m)
+		err := json.NewEncoder(b).Encode([]*Measurement{m})
 		if err != nil {
 			return nil, err
 		}
