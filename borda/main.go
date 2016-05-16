@@ -18,7 +18,7 @@ var (
 	httpsaddr     = flag.String("httpsaddr", ":62443", "The address at which to listen for HTTPS connections")
 	pkfile        = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
 	certfile      = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
-	dims          = flag.String("dimensions", "request_id,client_error,proxy_error,client,proxy", "Dimensions")
+	dims          = flag.String("dimensions", "client_error,proxy_error,client,proxy", "Dimensions")
 	influxurl     = flag.String("influxurl", "http://localhost:8086", "InfluxDB URL")
 	influxdb      = flag.String("influxdb", "lantern2", "InfluxDB database name")
 	influxuser    = flag.String("influxuser", "lantern2", "InfluxDB username")
