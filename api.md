@@ -16,7 +16,7 @@ HTTP test utility.
 
 ### Publish a measurement [POST]
 
-This publishes a measurement.
+This publishes one or more measurements in a list. Each measurement has:
 
 + name (string) - The name of the measurement, e.g. "client_results"
 + ts (string) - The timestamp of the measurement as an ISO8601 string, e.g. "2007-04-05T14:30:25.711725Z"
@@ -30,7 +30,7 @@ This publishes a measurement.
 
   + Body
 
-            {
+            [{
                 "name": "client_results",
                 "ts": "2007-04-05T14:30:25.711725Z",
                 "fields": {
@@ -43,7 +43,20 @@ This publishes a measurement.
                   "num_errors": 5,
                   "num_successes": 987
                 }
-            }
+             }, {
+               "name": "client_results",
+               "ts": "2007-04-05T14:30:25.711726Z",
+               "fields": {
+                 "client": "22DFS324DSFDSF",
+                 "proxy": "185.234.23.5",
+                 "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36",
+                 "os": "Windows",
+                 "os_version": 10,
+                 "lantern_version": "2.2.0 (20160413.044024)",
+                 "num_errors": 12,
+                 "num_successes": 89
+               }
+             }]
 
 + Response 201 (text/plain)
 + Response 400 (text/plain)

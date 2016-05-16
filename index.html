@@ -3,7 +3,7 @@ repository. One can domain front to borda using <a href="https://d157vud77ygy87.
 <p>There’s a <a href="postman.dump">postman.dump</a> available for use with the
 <a href="https://chrome.google.com/webstore/detail/postman/fhbjgbiflinjbdggehcddcbncdddomop?hl=en">Postman</a>
 HTTP test utility.</p>
-<section id="measurement" class="resource-group"><h2 class="group-heading">Measurement <a href="#measurement" class="permalink">&para;</a></h2><div id="measurement-measurements" class="resource"><h3 class="resource-heading">Measurements <a href="#measurement-measurements" class="permalink">&nbsp;&para;</a></h3><div id="measurement-measurements-post" class="action post"><h4 class="action-heading"><div class="name">Publish a measurement</div><a href="#measurement-measurements-post" class="method post">POST</a><code class="uri">/measurements</code></h4><p>This publishes a measurement.</p>
+<section id="measurement" class="resource-group"><h2 class="group-heading">Measurement <a href="#measurement" class="permalink">&para;</a></h2><div id="measurement-measurements" class="resource"><h3 class="resource-heading">Measurements <a href="#measurement-measurements" class="permalink">&nbsp;&para;</a></h3><div id="measurement-measurements-post" class="action post"><h4 class="action-heading"><div class="name">Publish a measurement</div><a href="#measurement-measurements-post" class="method post">POST</a><code class="uri">/measurements</code></h4><p>This publishes one or more measurements in a list. Each measurement has:</p>
 <ul>
 <li>
 <p>name (string) - The name of the measurement, e.g. “client_results”</p>
@@ -15,20 +15,36 @@ HTTP test utility.</p>
 <p>fields (map) - A map of measurement fields. Values can be numbers, booleans or strings.</p>
 </li>
 </ul>
-<h4>Example URI</h4><div class="definition"><span class="method post">POST</span>&nbsp;<span class="uri"><span class="hostname">https://borda.getlantern.org</span>/measurements</span></div><div class="title"><strong>Request</strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
-  "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"client_results"</span></span>,
-  "<span class="hljs-attribute">ts</span>": <span class="hljs-value"><span class="hljs-string">"2007-04-05T14:30:25.711725Z"</span></span>,
-  "<span class="hljs-attribute">fields</span>": <span class="hljs-value">{
-    "<span class="hljs-attribute">client</span>": <span class="hljs-value"><span class="hljs-string">"32DFS324DSFDSF"</span></span>,
-    "<span class="hljs-attribute">proxy</span>": <span class="hljs-value"><span class="hljs-string">"185.234.23.2"</span></span>,
-    "<span class="hljs-attribute">user-agent</span>": <span class="hljs-value"><span class="hljs-string">"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36"</span></span>,
-    "<span class="hljs-attribute">os</span>": <span class="hljs-value"><span class="hljs-string">"Windows"</span></span>,
-    "<span class="hljs-attribute">os_version</span>": <span class="hljs-value"><span class="hljs-number">10</span></span>,
-    "<span class="hljs-attribute">lantern_version</span>": <span class="hljs-value"><span class="hljs-string">"2.2.0 (20160413.044024)"</span></span>,
-    "<span class="hljs-attribute">num_errors</span>": <span class="hljs-value"><span class="hljs-number">5</span></span>,
-    "<span class="hljs-attribute">num_successes</span>": <span class="hljs-value"><span class="hljs-number">987</span>
+<h4>Example URI</h4><div class="definition"><span class="method post">POST</span>&nbsp;<span class="uri"><span class="hostname">https://borda.getlantern.org</span>/measurements</span></div><div class="title"><strong>Request</strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>[
+  {
+    "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"client_results"</span></span>,
+    "<span class="hljs-attribute">ts</span>": <span class="hljs-value"><span class="hljs-string">"2007-04-05T14:30:25.711725Z"</span></span>,
+    "<span class="hljs-attribute">fields</span>": <span class="hljs-value">{
+      "<span class="hljs-attribute">client</span>": <span class="hljs-value"><span class="hljs-string">"32DFS324DSFDSF"</span></span>,
+      "<span class="hljs-attribute">proxy</span>": <span class="hljs-value"><span class="hljs-string">"185.234.23.2"</span></span>,
+      "<span class="hljs-attribute">user-agent</span>": <span class="hljs-value"><span class="hljs-string">"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36"</span></span>,
+      "<span class="hljs-attribute">os</span>": <span class="hljs-value"><span class="hljs-string">"Windows"</span></span>,
+      "<span class="hljs-attribute">os_version</span>": <span class="hljs-value"><span class="hljs-number">10</span></span>,
+      "<span class="hljs-attribute">lantern_version</span>": <span class="hljs-value"><span class="hljs-string">"2.2.0 (20160413.044024)"</span></span>,
+      "<span class="hljs-attribute">num_errors</span>": <span class="hljs-value"><span class="hljs-number">5</span></span>,
+      "<span class="hljs-attribute">num_successes</span>": <span class="hljs-value"><span class="hljs-number">987</span>
+    </span>}
+  </span>},
+  {
+    "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"client_results"</span></span>,
+    "<span class="hljs-attribute">ts</span>": <span class="hljs-value"><span class="hljs-string">"2007-04-05T14:30:25.711726Z"</span></span>,
+    "<span class="hljs-attribute">fields</span>": <span class="hljs-value">{
+      "<span class="hljs-attribute">client</span>": <span class="hljs-value"><span class="hljs-string">"22DFS324DSFDSF"</span></span>,
+      "<span class="hljs-attribute">proxy</span>": <span class="hljs-value"><span class="hljs-string">"185.234.23.5"</span></span>,
+      "<span class="hljs-attribute">user-agent</span>": <span class="hljs-value"><span class="hljs-string">"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36"</span></span>,
+      "<span class="hljs-attribute">os</span>": <span class="hljs-value"><span class="hljs-string">"Windows"</span></span>,
+      "<span class="hljs-attribute">os_version</span>": <span class="hljs-value"><span class="hljs-number">10</span></span>,
+      "<span class="hljs-attribute">lantern_version</span>": <span class="hljs-value"><span class="hljs-string">"2.2.0 (20160413.044024)"</span></span>,
+      "<span class="hljs-attribute">num_errors</span>": <span class="hljs-value"><span class="hljs-number">12</span></span>,
+      "<span class="hljs-attribute">num_successes</span>": <span class="hljs-value"><span class="hljs-number">89</span>
+    </span>}
   </span>}
-</span>}</code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>201</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">text/plain</span></code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>400</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">text/plain</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>Message will indicate what specifically was wrong</code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>405</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">text/plain</span></code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>415</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">text/plain</span></code></pre><div style="height: 1px;"></div></div></div></div></div></section></div></div></div><p style="text-align: center;" class="text-muted">Generated by&nbsp;<a href="https://github.com/danielgtaylor/aglio" class="aglio">aglio</a>&nbsp;on 12 May 2016</p><script>/* eslint-env browser */
+]</code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>201</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">text/plain</span></code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>400</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">text/plain</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>Message will indicate what specifically was wrong</code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>405</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">text/plain</span></code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>415</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">text/plain</span></code></pre><div style="height: 1px;"></div></div></div></div></div></section></div></div></div><p style="text-align: center;" class="text-muted">Generated by&nbsp;<a href="https://github.com/danielgtaylor/aglio" class="aglio">aglio</a>&nbsp;on 16 May 2016</p><script>/* eslint-env browser */
 /* eslint quotes: [2, "single"] */
 'use strict';
 
