@@ -21,9 +21,15 @@ type Measurement struct {
 	// Ts records the time of the measurement.
 	Ts time.Time `json:"ts,omitempty"`
 
-	// Fields captures key/value pairs with details of the measurement. It maps to
-	// "tags" and "fields" in InfluxDB depending on which fields have been
-	// configured as Dimensions on the Collector.
+	// Values contains numeric values of the measurement. These will be stored as
+	// "fields" in InfluxDB.
+	//
+	// Example: { "num_errors": 67 }
+	Values map[string]float64 `json:"values,omitempty"`
+
+	// Dimensions captures key/value pairs which characterize the measurement.
+	// Dimensions are stored as "tags" or "fields" in InfluxDB depending on which
+	// dimensions have been configured as "IndexedDimensions" on the Collector.
 	//
 	// Example: { "requestid": "18af517b-004f-486c-9978-6cf60be7f1e9",
 	//            "ipv6": "2001:0db8:0a0b:12f0:0000:0000:0000:0001",
@@ -32,9 +38,8 @@ type Measurement struct {
 	//            "cpu_idle": 10.1,
 	//            "cpu_system": 53.3,
 	//            "cpu_user": 36.6,
-	//            "num_errors": 67,
 	//            "connected_to_internet": true }
-	Fields map[string]interface{} `json:"fields,omitempty"`
+	Dimensions map[string]interface{} `json:"dimensions,omitempty"`
 }
 
 // WriteFunc is a function that writes a batch to the database
@@ -55,9 +60,9 @@ type Collector interface {
 
 // Options configures a Collector.
 type Options struct {
-	// Dimensions identifies which fields should be treated as dimensions (tags
-	// in InfluxDB).
-	Dimensions []string
+	// IndexedDimensions identifies which dimensions should be indexed for fast
+	// queries and grouping. In InfluxDB these are stored as "tags".
+	IndexedDimensions []string
 
 	// WriteToDatabase is a function that writes a batch to the database. If
 	// specified, the influx connection parameters are ignored
@@ -86,9 +91,9 @@ type Options struct {
 
 type collector struct {
 	*Options
-	dimensionNames map[string]bool
-	in             chan *Measurement
-	finalError     eventual.Value
+	indexedDimensions map[string]bool
+	in                chan *Measurement
+	finalError        eventual.Value
 }
 
 // NewCollector creates and starts a new Collector
@@ -107,13 +112,13 @@ func NewCollector(opts *Options) Collector {
 	}
 
 	c := &collector{
-		Options:        opts,
-		dimensionNames: make(map[string]bool, len(opts.Dimensions)),
-		in:             make(chan *Measurement, opts.BatchSize*2),
-		finalError:     eventual.NewValue(),
+		Options:           opts,
+		indexedDimensions: make(map[string]bool, len(opts.IndexedDimensions)),
+		in:                make(chan *Measurement, opts.BatchSize*2),
+		finalError:        eventual.NewValue(),
 	}
-	for _, dim := range opts.Dimensions {
-		c.dimensionNames[dim] = true
+	for _, dim := range opts.IndexedDimensions {
+		c.indexedDimensions[dim] = true
 	}
 
 	go c.run()
@@ -183,11 +188,11 @@ func (c *collector) run() {
 		case m := <-c.in:
 			// Create a point for the original measurement key and a point for the
 			// combined measurement.
-			tags := make(map[string]string, len(c.Dimensions))
-			fields := make(map[string]interface{}, len(m.Fields))
-			for key, value := range m.Fields {
+			tags := make(map[string]string, len(c.IndexedDimensions))
+			fields := make(map[string]interface{}, len(m.Values)+len(m.Dimensions))
+			addTagOrField := func(key string, value interface{}, isDimension bool) {
 				if value != nil && value != "" {
-					if c.dimensionNames[key] {
+					if isDimension && c.indexedDimensions[key] {
 						var stringValue string
 						switch v := value.(type) {
 						case string:
@@ -201,6 +206,12 @@ func (c *collector) run() {
 						fields[key] = value
 					}
 				}
+			}
+			for key, value := range m.Dimensions {
+				addTagOrField(key, value, true)
+			}
+			for key, value := range m.Values {
+				addTagOrField(key, value, false)
 			}
 			tags["orig_measurement"] = m.Name
 			point, err := client.NewPoint("combined", tags, fields, m.Ts)

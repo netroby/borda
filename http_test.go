@@ -19,31 +19,37 @@ var (
 	good            = &Measurement{
 		Name: "mymeasure",
 		Ts:   time.Now(),
-		Fields: map[string]interface{}{
+		Values: map[string]float64{
+			"field_float": 2.1,
+		},
+		Dimensions: map[string]interface{}{
 			"dim_string":   "a",
 			"dim_int":      1,
 			"field_int":    2,
-			"field_float":  2.1,
 			"field_bool":   true,
 			"field_string": "stringy",
 		},
 	}
 	missingName = &Measurement{
-		Ts:     time.Now(),
-		Fields: good.Fields,
+		Ts:         time.Now(),
+		Values:     good.Values,
+		Dimensions: good.Dimensions,
 	}
 	missingTS = &Measurement{
-		Name:   "mymeasure",
-		Fields: good.Fields,
+		Name:       "mymeasure",
+		Values:     good.Values,
+		Dimensions: good.Dimensions,
 	}
-	missingFields = &Measurement{
-		Name: "mymeasure",
-		Ts:   time.Now(),
+	missingValues = &Measurement{
+		Name:       "mymeasure",
+		Ts:         time.Now(),
+		Dimensions: good.Dimensions,
 	}
-	emptyFields = &Measurement{
-		Name:   "mymeasure",
-		Ts:     time.Now(),
-		Fields: map[string]interface{}{},
+	emptyValues = &Measurement{
+		Name:       "mymeasure",
+		Ts:         time.Now(),
+		Values:     map[string]float64{},
+		Dimensions: good.Dimensions,
 	}
 )
 
@@ -62,13 +68,13 @@ func TestHTTPRoundTrip(t *testing.T) {
 	}
 
 	c := NewCollector(&Options{
-		Dimensions:      []string{"dim_string", "dim_int"},
-		WriteToDatabase: write,
-		DBName:          dbName,
-		BatchSize:       1,
-		MaxBatchWindow:  24 * time.Hour,
-		MaxRetries:      5,
-		RetryInterval:   5 * time.Millisecond,
+		IndexedDimensions: []string{"dim_string", "dim_int"},
+		WriteToDatabase:   write,
+		DBName:            dbName,
+		BatchSize:         1,
+		MaxBatchWindow:    24 * time.Hour,
+		MaxRetries:        5,
+		RetryInterval:     5 * time.Millisecond,
 	})
 	go http.Serve(hl, c)
 
@@ -81,10 +87,10 @@ func TestHTTPRoundTrip(t *testing.T) {
 	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{missingTS})
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{missingFields})
+	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{missingValues})
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{emptyFields})
+	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{emptyValues})
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	resp, _ = httpRequest(httpAddr, goodContentType, nil)

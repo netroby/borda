@@ -18,13 +18,13 @@ const (
 func TestBatchingOnSize(t *testing.T) {
 	ok, err := doTest(t, func(write WriteFunc) Collector {
 		return NewCollector(&Options{
-			Dimensions:      []string{"dim_string", "dim_int"},
-			WriteToDatabase: write,
-			DBName:          dbName,
-			BatchSize:       1,
-			MaxBatchWindow:  24 * time.Hour,
-			MaxRetries:      5,
-			RetryInterval:   5 * time.Millisecond,
+			IndexedDimensions: []string{"dim_string", "dim_int"},
+			WriteToDatabase:   write,
+			DBName:            dbName,
+			BatchSize:         1,
+			MaxBatchWindow:    24 * time.Hour,
+			MaxRetries:        5,
+			RetryInterval:     5 * time.Millisecond,
 		})
 	})
 
@@ -35,13 +35,13 @@ func TestBatchingOnSize(t *testing.T) {
 func TestBatchingOnTime(t *testing.T) {
 	ok, err := doTest(t, func(write WriteFunc) Collector {
 		return NewCollector(&Options{
-			Dimensions:      []string{"dim_string", "dim_int"},
-			WriteToDatabase: write,
-			DBName:          dbName,
-			BatchSize:       1000,
-			MaxBatchWindow:  1 * time.Millisecond,
-			MaxRetries:      5,
-			RetryInterval:   5 * time.Millisecond,
+			IndexedDimensions: []string{"dim_string", "dim_int"},
+			WriteToDatabase:   write,
+			DBName:            dbName,
+			BatchSize:         1000,
+			MaxBatchWindow:    1 * time.Millisecond,
+			MaxRetries:        5,
+			RetryInterval:     5 * time.Millisecond,
 		})
 	})
 
@@ -52,13 +52,13 @@ func TestBatchingOnTime(t *testing.T) {
 func TestRetriesExhausted(t *testing.T) {
 	ok, err := doTest(t, func(write WriteFunc) Collector {
 		return NewCollector(&Options{
-			Dimensions:      []string{"dim_string", "dim_int"},
-			WriteToDatabase: write,
-			DBName:          dbName,
-			BatchSize:       1000,
-			MaxBatchWindow:  1 * time.Millisecond,
-			MaxRetries:      1,
-			RetryInterval:   5 * time.Millisecond,
+			IndexedDimensions: []string{"dim_string", "dim_int"},
+			WriteToDatabase:   write,
+			DBName:            dbName,
+			BatchSize:         1000,
+			MaxBatchWindow:    1 * time.Millisecond,
+			MaxRetries:        1,
+			RetryInterval:     5 * time.Millisecond,
 		})
 	})
 
@@ -84,11 +84,13 @@ func doTest(t *testing.T, buildCollector func(WriteFunc) Collector) (bool, error
 	c.Submit(&Measurement{
 		Name: "mymeasure",
 		Ts:   time.Now(),
-		Fields: map[string]interface{}{
+		Values: map[string]float64{
+			"field_float": 2.1,
+		},
+		Dimensions: map[string]interface{}{
 			"dim_string":   "a",
 			"dim_int":      1,
 			"field_int":    2,
-			"field_float":  2.1,
 			"field_bool":   true,
 			"field_string": "stringy",
 		},

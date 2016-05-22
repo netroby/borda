@@ -53,8 +53,8 @@ func (c *collector) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		if m.Fields == nil || len(m.Fields) == 0 {
-			badRequest(resp, "Need at least one field")
+		if m.Values == nil || len(m.Values) == 0 {
+			badRequest(resp, "Need at least one value")
 			return
 		}
 	}

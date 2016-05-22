@@ -39,13 +39,13 @@ func TestRealWorldScenario(t *testing.T) {
 	}
 
 	c := NewCollector(&Options{
-		Dimensions:      []string{"request_id", "client_error", "proxy_error", "client", "proxy", "browser", "os", "os_version", "client_version", "randomserverthing"},
-		WriteToDatabase: write,
-		DBName:          "lantern",
-		BatchSize:       1000,
-		MaxBatchWindow:  30 * time.Second,
-		MaxRetries:      100,
-		RetryInterval:   250 * time.Millisecond,
+		IndexedDimensions: []string{"request_id", "client_error", "proxy_error", "client", "proxy", "browser", "os", "os_version", "client_version", "randomserverthing"},
+		WriteToDatabase:   write,
+		DBName:            "lantern",
+		BatchSize:         1000,
+		MaxBatchWindow:    30 * time.Second,
+		MaxRetries:        100,
+		RetryInterval:     250 * time.Millisecond,
 	})
 
 	// Create the database
@@ -126,9 +126,11 @@ func (p *proxy) run() {
 				p.c.Submit(&Measurement{
 					Name: "proxy_results",
 					Ts:   time.Now(),
-					Fields: map[string]interface{}{
-						"proxy_error":       "OriginConnectTimeout",
+					Values: map[string]float64{
 						"proxy_error_count": 1,
+					},
+					Dimensions: map[string]interface{}{
+						"proxy_error":       "OriginConnectTimeout",
 						"client":            req.client,
 						"proxy":             p.ip,
 						"randomserverthing": rand.Intn(10),
@@ -140,9 +142,11 @@ func (p *proxy) run() {
 				p.c.Submit(&Measurement{
 					Name: "proxy_results",
 					Ts:   time.Now(),
-					Fields: map[string]interface{}{
-						"proxy_error":       "MissingAuthToken",
+					Values: map[string]float64{
 						"proxy_error_count": 1,
+					},
+					Dimensions: map[string]interface{}{
+						"proxy_error":       "MissingAuthToken",
 						"client":            req.client,
 						"proxy":             p.ip,
 						"randomserverthing": rand.Intn(10),
@@ -155,11 +159,13 @@ func (p *proxy) run() {
 				p.c.Submit(&Measurement{
 					Name: "proxy_results",
 					Ts:   time.Now(),
-					Fields: map[string]interface{}{
+					Values: map[string]float64{
 						"proxy_success_count": 1,
-						"client":              req.client,
-						"proxy":               p.ip,
-						"randomserverthing":   rand.Intn(10),
+					},
+					Dimensions: map[string]interface{}{
+						"client":            req.client,
+						"proxy":             p.ip,
+						"randomserverthing": rand.Intn(10),
 					},
 				})
 			}
@@ -180,9 +186,11 @@ func (p *proxy) updateLoadAvg() {
 	p.c.Submit(&Measurement{
 		Name: "proxy_health",
 		Ts:   time.Now(),
-		Fields: map[string]interface{}{
-			"proxy":    p.ip,
+		Values: map[string]float64{
 			"load_avg": p.loadAvg,
+		},
+		Dimensions: map[string]interface{}{
+			"proxy": p.ip,
 		},
 	})
 }
@@ -226,9 +234,10 @@ func runClient(id string, c Collector, proxies []*proxy) {
 			for ip, countsForProxy := range resultCounts {
 				for result, count := range countsForProxy {
 					m := &Measurement{
-						Name: "client_results",
-						Ts:   time.Now(),
-						Fields: map[string]interface{}{
+						Name:   "client_results",
+						Ts:     time.Now(),
+						Values: map[string]float64{},
+						Dimensions: map[string]interface{}{
 							"client":         id,
 							"proxy":          ip,
 							"browser":        "chrome",
@@ -238,10 +247,10 @@ func runClient(id string, c Collector, proxies []*proxy) {
 						},
 					}
 					if result == result_ok {
-						m.Fields["client_success_count"] = count
+						m.Values["client_success_count"] = float64(count)
 					} else {
-						m.Fields["client_error_count"] = count
-						m.Fields["client_error"] = resultCodesToErrorCodes[result]
+						m.Values["client_error_count"] = float64(count)
+						m.Dimensions["client_error"] = resultCodesToErrorCodes[result]
 					}
 					c.Submit(m)
 				}
