@@ -20,7 +20,8 @@ This publishes one or more measurements in a list. Each measurement has:
 
 + name (string) - The name of the measurement, e.g. "client_results"
 + ts (string) - The timestamp of the measurement as an ISO8601 string, e.g. "2007-04-05T14:30:25.711725Z"
-+ fields (map) - A map of measurement fields. Values can be numbers, booleans or strings.
++ values (map) - A map of measurement values (numbers).
++ dimensions (map) - A map of measurement dimensions (metadata). Values can be numbers, booleans or strings.
 
 + Request
 
@@ -33,28 +34,32 @@ This publishes one or more measurements in a list. Each measurement has:
             [{
                 "name": "client_results",
                 "ts": "2007-04-05T14:30:25.711725Z",
-                "fields": {
+                "values": {
+                  "num_errors": 5,
+                  "num_successes": 987
+                },
+                "dimensions": {
                   "client": "32DFS324DSFDSF",
                   "proxy": "185.234.23.2",
                   "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36",
                   "os": "Windows",
                   "os_version": 10,
-                  "lantern_version": "2.2.0 (20160413.044024)",
-                  "num_errors": 5,
-                  "num_successes": 987
+                  "lantern_version": "2.2.0 (20160413.044024)"
                 }
              }, {
                "name": "client_results",
                "ts": "2007-04-05T14:30:25.711726Z",
-               "fields": {
+               "values": {
+                  "num_errors": 12,
+                  "num_successes": 89
+                },
+               "dimensions": {
                  "client": "22DFS324DSFDSF",
                  "proxy": "185.234.23.5",
                  "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.94 Safari/537.36",
                  "os": "Windows",
                  "os_version": 10,
-                 "lantern_version": "2.2.0 (20160413.044024)",
-                 "num_errors": 12,
-                 "num_successes": 89
+                 "lantern_version": "2.2.0 (20160413.044024)"
                }
              }]
 
