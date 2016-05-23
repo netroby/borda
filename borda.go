@@ -117,6 +117,8 @@ func NewCollector(opts *Options) Collector {
 		in:                make(chan *Measurement, opts.BatchSize*2),
 		finalError:        eventual.NewValue(),
 	}
+
+	glog.Infof("IndexedDimensions: %v", opts.IndexedDimensions)
 	for _, dim := range opts.IndexedDimensions {
 		c.indexedDimensions[dim] = true
 	}
