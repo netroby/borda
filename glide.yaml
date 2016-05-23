@@ -10,3 +10,4 @@ import:
   subpackages:
   - client/v2
 - package: github.com/vharitonsky/iniflags
+- package: github.com/getlantern/errors
