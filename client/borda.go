@@ -1,6 +1,7 @@
 package client
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -91,7 +92,13 @@ func NewClient(opts *Options) *Client {
 		opts.BatchInterval = 5 * time.Minute
 	}
 	if opts.Client == nil {
-		opts.Client = &http.Client{}
+		opts.Client = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					ClientSessionCache: tls.NewLRUClientSessionCache(100),
+				},
+			},
+		}
 	}
 
 	b := &Client{
