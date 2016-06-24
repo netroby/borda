@@ -1,0 +1,46 @@
+hash: f9590971911674faa5ce018e3453b49d187910812335db8e26d9fab5fbebe28a
+updated: 2016-06-24T11:14:43.746808568-05:00
+imports:
+- name: github.com/getlantern/byteexec
+  version: 431d6edd2151495029d77e1c510affa5d89fe168
+- name: github.com/getlantern/context
+  version: 624d99b1798d7c5375ea1d3ca4c5b04d58f7c775
+- name: github.com/getlantern/errors
+  version: 2cb9490e9d7173de46312139267791c8115f5e10
+- name: github.com/getlantern/eventual
+  version: a1db8f0cde49e1f2a0cbf34879011e5eceeaac67
+- name: github.com/getlantern/filepersist
+  version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
+- name: github.com/getlantern/golog
+  version: 00277a46b6a621ee8868060f5bd4b0173d452c7b
+- name: github.com/getlantern/hex
+  version: 083fba3033ad473db3dd31c9bb368473d37581a7
+- name: github.com/getlantern/hidden
+  version: d52a649ab33af200943bb599898dbdcfdbc94cb7
+- name: github.com/getlantern/keyman
+  version: 068a9b24f9af425a6f662a8fe5dcc032e4001897
+  subpackages:
+  - certimporter
+- name: github.com/getlantern/ops
+  version: b70875f5d689a9438bca72aefd7142a2af889b18
+- name: github.com/getlantern/stack
+  version: 02f928aad224fbccd50d66edd776fc9d1e9f2f2b
+- name: github.com/getlantern/tlsdefaults
+  version: abd866d3287cc5c24175a5773997138d15b61889
+- name: github.com/golang/glog
+  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+- name: github.com/influxdata/influxdb
+  version: 383332daed5595926c235f250b11433f67229c35
+  subpackages:
+  - client/v2
+  - models
+  - pkg/escape
+- name: github.com/oxtoacart/bpool
+  version: 4e1c5567d7c2dd59fa4c7c83d34c2f3528b025d6
+- name: github.com/stretchr/testify
+  version: d77da356e56a7428ad25149ca77381849a6a5232
+  subpackages:
+  - assert
+- name: github.com/vharitonsky/iniflags
+  version: 743d6901e7ca8ab61ac533a8c49939ac8b560e72
+devImports: []
