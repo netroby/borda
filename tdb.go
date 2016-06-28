@@ -3,11 +3,14 @@ package borda
 import (
 	"time"
 
+	"github.com/dustin/go-humanize"
+	"github.com/golang/glog"
 	"github.com/oxtoacart/tdb"
+	. "github.com/oxtoacart/tdb/expr"
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
-func TDBSave(dir) (SaveFunc, error) {
+func TDBSave(dir string) (SaveFunc, error) {
 	resolution := 5 * time.Minute
 	hotPeriod := 10 * time.Minute
 	retentionPeriod := 1 * time.Hour
@@ -16,10 +19,21 @@ func TDBSave(dir) (SaveFunc, error) {
 		Dir:       dir,
 		BatchSize: 1000,
 	})
-	err = db.CreateTable("combined", resolution, hotPeriod, retentionPeriod, tdb.DerivedField{
+	err := db.CreateTable("combined", resolution, hotPeriod, retentionPeriod, tdb.DerivedField{
 		Name: "error_rate",
 		Expr: Avg(Calc("error_count / success_count")),
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		ticker := time.NewTicker(5 * time.Second)
+		for range ticker.C {
+			stats := db.TableStats("combined")
+			glog.Infof("Hot Keys: %v\tArchived Buckets: %v", humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets))
+		}
+	}()
 
 	return func(m *Measurement) error {
 		return db.Insert("combined", &tdb.Point{
@@ -27,5 +41,5 @@ func TDBSave(dir) (SaveFunc, error) {
 			Dims: m.Dimensions,
 			Vals: m.Values,
 		})
-	}
+	}, nil
 }

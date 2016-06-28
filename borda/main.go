@@ -43,7 +43,11 @@ func main() {
 	}
 	fmt.Fprintf(os.Stdout, "Listening for HTTPS connections at %v\n", hl.Addr())
 
-	s := borda.TDBSave(".")
+	s, err := borda.TDBSave("tdbdata")
+	if err != nil {
+		glog.Fatalf("Unable to initialize tdb: %v", err)
+	}
+
 	h := &borda.Handler{s}
 	serverErr := http.Serve(hl, h)
 	if serverErr != nil {
