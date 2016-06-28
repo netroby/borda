@@ -31,7 +31,7 @@ func TDBSave(dir string) (SaveFunc, error) {
 		ticker := time.NewTicker(5 * time.Second)
 		for range ticker.C {
 			stats := db.TableStats("combined")
-			glog.Infof("Hot Keys: %v\tArchived Buckets: %v", humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets))
+			glog.Infof("Hot Keys: %v     Archived Buckets: %v", humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets))
 		}
 	}()
 
