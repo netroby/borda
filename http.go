@@ -16,8 +16,14 @@ const (
 	ContentTypeJSON = "application/json"
 )
 
+// Handler is an http.Handler that reads Measurements from HTTP and saves them
+// to the database.
+type Handler struct {
+	Save SaveFunc
+}
+
 // ServeHTTP implements the http.Handler interface and supports publishing measurements via HTTP.
-func (c *collector) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		resp.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprintf(resp, "Method %v not allowed\n", req.Method)
@@ -63,7 +69,10 @@ func (c *collector) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 
 	glog.Infof("Received %d measurements", len(measurements))
 	for _, m := range measurements {
-		c.Submit(m)
+		err := h.Save(m)
+		if err != nil {
+			log.Errorf("Error saving measurement, continuing: %v", err)
+		}
 	}
 
 	resp.WriteHeader(http.StatusCreated)

@@ -17,7 +17,7 @@ var (
 	goodContentType = ContentTypeJSON
 	badContentType  = "somethingelse"
 	good            = &Measurement{
-		Name: "mymeasure",
+		Name: "combined",
 		Ts:   time.Now(),
 		Values: map[string]float64{
 			"field_float": 2.1,
@@ -67,16 +67,11 @@ func TestHTTPRoundTrip(t *testing.T) {
 		return nil
 	}
 
-	c := NewCollector(&Options{
-		IndexedDimensions: []string{"dim_string", "dim_int"},
-		WriteToDatabase:   write,
-		DBName:            dbName,
-		BatchSize:         1,
-		MaxBatchWindow:    24 * time.Hour,
-		MaxRetries:        5,
-		RetryInterval:     5 * time.Millisecond,
-	})
-	go http.Serve(hl, c)
+	s := func(m *Measurement) {
+		done.Set(true)
+	}
+	h := &Handler{s}
+	go http.Serve(hl, h)
 
 	resp, _ := httpRequest(httpAddr, badContentType, []*Measurement{good})
 	assert.Equal(t, http.StatusUnsupportedMediaType, resp.StatusCode)
@@ -127,4 +122,33 @@ func httpRequest(addr string, contentType string, measurements []*Measurement) (
 	}
 	req.Header.Set(ContentType, contentType)
 	return client.Do(req)
+}
+
+func validateMeasurement(t *testing.T, allFloats bool, m *Measurement) {
+	assert.Equal(t, "combined", m.Name, "Incorrect measurement key")
+	assert.NotNil(t, point.Time(), "Missing timestamp")
+	assert.Equal(t, map[string]interface{}{
+		// Original dimensions, all are strings
+		"dim_string": "a",
+		"dim_int":    "1",
+	}, point.Tags(), "Incorrect tags")
+
+	var dimI interface{} = int64(1)
+	var i interface{} = int64(2)
+	if allFloats {
+		dimI = float64(1)
+		i = float64(2)
+	}
+
+	assert.Equal(t, map[string]interface{}{
+		// Original fields
+		"field_int":    i,
+		"field_float":  float64(2.1),
+		"field_bool":   true,
+		"field_string": "stringy",
+
+		// Synthetic fields for dimensions
+		"_dim_string": "a",
+		"_dim_int":    dimI,
+	}, point.Fields(), "Incorrect fields")
 }

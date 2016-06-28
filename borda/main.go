@@ -44,30 +44,10 @@ func main() {
 	}
 	fmt.Fprintf(os.Stdout, "Listening for HTTPS connections at %v\n", hl.Addr())
 
-	write, err := borda.InfluxWriter(*influxurl, *influxuser, *influxpass)
-	if err != nil {
-		glog.Fatalf("Unable to initialize InfluxDB writer: %v", err)
-	}
-
-	c := borda.NewCollector(&borda.Options{
-		IndexedDimensions: strings.Split(*indexeddims, ","),
-		WriteToDatabase:   write,
-		DBName:            *influxdb,
-		BatchSize:         *batchsize,
-		MaxBatchWindow:    *batchwindow,
-		MaxRetries:        *maxretries,
-		RetryInterval:     *retryinterval,
-	})
-
-	go func() {
-		err := http.Serve(hl, c)
-		if err != nil {
-			glog.Fatalf("Error serving HTTPS: %v", err)
-		}
-	}()
-
-	err = c.Wait(-1)
-	if err != nil {
-		glog.Fatalf("Error running borda: %v", err)
+	s := borda.TDBSave(".")
+	h := &borda.Handler{s}
+	serverErr := http.Serve(hl, h)
+	if serverErr != nil {
+		glog.Fatalf("Error serving HTTPS: %v", serverErr)
 	}
 }
