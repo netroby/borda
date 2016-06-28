@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/golang/glog"
 )
 
 const (
@@ -59,6 +61,7 @@ func (c *collector) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	glog.Infof("Received %d measurements", len(measurements))
 	for _, m := range measurements {
 		c.Submit(m)
 	}

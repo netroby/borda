@@ -164,10 +164,12 @@ func (c *collector) run() {
 		if batchSize == 0 {
 			return nil
 		}
+		glog.Infof("Committing batch of size %d", batchSize)
 		retries := 0
 		for {
 			err := c.WriteToDatabase(batch)
 			if err == nil {
+				glog.Infof("Committed batch of size %d", batchSize)
 				return newBatch()
 			}
 			if retries >= c.MaxRetries {

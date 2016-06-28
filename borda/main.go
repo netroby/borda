@@ -23,9 +23,9 @@ var (
 	influxdb      = flag.String("influxdb", "lantern2", "InfluxDB database name")
 	influxuser    = flag.String("influxuser", "lantern2", "InfluxDB username")
 	influxpass    = flag.String("influxpass", "", "InfluxDB password")
-	batchsize     = flag.Int("batchsize", 1000, "Batch size")
+	batchsize     = flag.Int("batchsize", 100, "Batch size")
 	batchwindow   = flag.Duration("batchwindow", 30*time.Second, "Batch window")
-	maxretries    = flag.Int("maxretries", 100, "Maximum retries to write to InfluxDB before giving up")
+	maxretries    = flag.Int("maxretries", 25, "Maximum retries to write to InfluxDB before giving up")
 	retryinterval = flag.Duration("retryinterval", 30*time.Second, "How long to wait between retries")
 )
 
