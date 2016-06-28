@@ -114,7 +114,7 @@ func NewCollector(opts *Options) Collector {
 	c := &collector{
 		Options:           opts,
 		indexedDimensions: make(map[string]bool, len(opts.IndexedDimensions)),
-		in:                make(chan *Measurement, opts.BatchSize*2),
+		in:                make(chan *Measurement, opts.BatchSize*10),
 		finalError:        eventual.NewValue(),
 	}
 
@@ -128,7 +128,12 @@ func NewCollector(opts *Options) Collector {
 }
 
 func (c *collector) Submit(m *Measurement) {
-	c.in <- m
+	select {
+	case c.in <- m:
+		// ok
+	default:
+		glog.Errorf("In full, discarding measurement")
+	}
 }
 
 func (c *collector) Wait(timeout time.Duration) error {
