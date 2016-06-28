@@ -36,7 +36,7 @@ func TDBSave(dir string) (SaveFunc, error) {
 
 	return func(m *Measurement) error {
 		return db.Insert("combined", &tdb.Point{
-			Ts:   m.Ts,
+			Ts:   time.Now(),
 			Dims: m.Dimensions,
 			Vals: m.Values,
 		})
