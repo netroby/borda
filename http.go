@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/golang/glog"
 )
 
 const (
@@ -67,11 +65,11 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	glog.Infof("Received %d measurements", len(measurements))
+	log.Debugf("Received %d measurements", len(measurements))
 	for _, m := range measurements {
 		err := h.Save(m)
 		if err != nil {
-			glog.Errorf("Error saving measurement, continuing: %v", err)
+			log.Errorf("Error saving measurement, continuing: %v", err)
 		}
 	}
 
