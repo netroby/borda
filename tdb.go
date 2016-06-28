@@ -10,9 +10,9 @@ import (
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
 func TDBSave(dir string) (SaveFunc, error) {
-	resolution := 1 * time.Minute
-	hotPeriod := 2 * time.Minute
-	retentionPeriod := 1 * time.Hour
+	resolution := 5 * time.Minute
+	hotPeriod := 10 * time.Minute
+	retentionPeriod := 4 * time.Hour
 
 	db := tdb.NewDB(&tdb.DBOpts{
 		Dir:       dir,
