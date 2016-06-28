@@ -2,6 +2,12 @@ package borda
 
 import (
 	"time"
+
+	"github.com/getlantern/golog"
+)
+
+var (
+	log = golog.LoggerFor("borda")
 )
 
 // Measurement represents a measurement at a point in time. It maps to a "point"

@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/golang/glog"
 	"github.com/oxtoacart/tdb"
 	. "github.com/oxtoacart/tdb/expr"
 )
@@ -31,7 +30,7 @@ func TDBSave(dir string) (SaveFunc, error) {
 		ticker := time.NewTicker(5 * time.Second)
 		for range ticker.C {
 			stats := db.TableStats("combined")
-			glog.Infof("Hot Keys: %v     Archived Buckets: %v", humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets))
+			log.Debugf("Hot Keys: %v     Archived Buckets: %v", humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets))
 		}
 	}()
 
