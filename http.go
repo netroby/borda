@@ -71,7 +71,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	for _, m := range measurements {
 		err := h.Save(m)
 		if err != nil {
-			log.Errorf("Error saving measurement, continuing: %v", err)
+			glog.Errorf("Error saving measurement, continuing: %v", err)
 		}
 	}
 

@@ -1,14 +1,7 @@
 package borda
 
 import (
-	"fmt"
-	"math"
-	"net/http"
 	"time"
-
-	"github.com/getlantern/eventual"
-	"github.com/golang/glog"
-	"github.com/influxdata/influxdb/client/v2"
 )
 
 // Measurement represents a measurement at a point in time. It maps to a "point"
