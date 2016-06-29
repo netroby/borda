@@ -40,7 +40,7 @@ func main() {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
 
-	rl, err := tlsdefaults.Listen(*httpsaddr, *pkfile, *certfile)
+	rl, err := tlsdefaults.Listen(*reportsaddr, *pkfile, *certfile)
 	if err != nil {
 		log.Fatalf("Unable to listen for reports: %v", err)
 	}
