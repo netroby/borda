@@ -9,7 +9,7 @@ import (
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
-func TDBSave(dir string) (SaveFunc, error) {
+func TDBSave(dir string) (SaveFunc, *tdb.DB, error) {
 	resolution := 5 * time.Minute
 	hotPeriod := 10 * time.Minute
 	retentionPeriod := 1 * time.Hour
@@ -23,7 +23,7 @@ func TDBSave(dir string) (SaveFunc, error) {
 		Expr: Avg(Calc("error_count / success_count")),
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	go func() {
@@ -40,5 +40,5 @@ func TDBSave(dir string) (SaveFunc, error) {
 			Dims: m.Dimensions,
 			Vals: m.Values,
 		})
-	}, nil
+	}, db, nil
 }
