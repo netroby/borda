@@ -97,6 +97,7 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 	}
 	avgErrorRate := totalErrorRate / float64(len(result))
 
+	fmt.Fprintln(resp, "---- Proxies by Error Rate ----")
 	fmt.Fprintf(resp, "Average error rate: %f\n\n", avgErrorRate)
 	for _, row := range result {
 		fmt.Fprintf(resp, "%v : %f / %f -> %f\n", row.Dims["proxy_host"], row.Summaries["total_error_count"], row.Summaries["total_success_count"], row.Summaries["avg_error_rate"])
