@@ -20,7 +20,7 @@ func TDBSave(dir string) (SaveFunc, *tdb.DB, error) {
 	})
 	err := db.CreateTable("combined", resolution, hotPeriod, retentionPeriod, tdb.DerivedField{
 		Name: "error_rate",
-		Expr: Calc("error_count / (success_count + .00000000001)"),
+		Expr: Avg(Calc("success_count <= 0 ? 0 : error_count / success_count")),
 	})
 	if err != nil {
 		return nil, nil, err
