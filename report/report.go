@@ -28,7 +28,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resp.Header().Set("Content-Type", "text/csv")
+	resp.Header().Set("Content-Type", "text/tsv")
 	switch strings.ToLower(req.URL.Path)[1:] {
 	case "byerrorrate":
 		h.byErrorRate(resp)
@@ -57,8 +57,14 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 				Expr: Avg(Calc("success_count > 0 ? error_count / success_count")),
 			},
 		},
+		Summaries: []DerivedField{
+			DerivedField{
+				Name: "avg_error_rate",
+				Expr: Avg(Calc("error_rate")),
+			},
+		},
 		OrderBy: map[string]Order{
-			"error_rate": ORDER_DESC,
+			"avg_error_rate": ORDER_DESC,
 		},
 	}
 
@@ -75,16 +81,27 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 		return
 	}
 
-	fmt.Fprintln(resp, "proxy_host,period,success_count,error_count,error_rate,")
+	// Take only the top 20
+	if len(result) > 20 {
+		result = result[:20]
+	}
+
+	numPeriods := 0
+	// Print headers
+	fmt.Fprint(resp, "# ")
 	for _, row := range result {
-		for i := 0; i < row.NumPeriods; i++ {
-			fmt.Fprint(resp, row.Dims[0])
-			fmt.Fprint(resp, ",?,")
-			for _, vals := range row.Fields {
-				fmt.Fprint(resp, vals[i])
-				fmt.Fprint(resp, ",")
-			}
-			fmt.Fprint(resp, "\n")
+		numPeriods = row.NumPeriods
+		fmt.Fprint(resp, row.Dims["proxy_host"])
+		fmt.Fprint(resp, "\t")
+	}
+	fmt.Fprint(resp, "\n")
+
+	for i := 0; i < numPeriods; i++ {
+		fmt.Fprint(resp, i)
+		for _, row := range result {
+			fmt.Fprint(resp, row.Fields["error_rate"])
+			fmt.Fprint(resp, "\t")
 		}
+		fmt.Fprint(resp, "\n")
 	}
 }
