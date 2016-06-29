@@ -28,7 +28,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resp.Header().Set("Content-Type", "text/tsv")
+	resp.Header().Set("Content-Type", "text/plain")
 	switch strings.ToLower(req.URL.Path)[1:] {
 	case "byerrorrate":
 		h.byErrorRate(resp)
@@ -60,6 +60,14 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 		},
 		Summaries: []DerivedField{
 			DerivedField{
+				Name: "total_success_count",
+				Expr: Calc("success_count"),
+			},
+			DerivedField{
+				Name: "total_error_count",
+				Expr: Calc("error_count"),
+			},
+			DerivedField{
 				Name: "avg_error_rate",
 				Expr: Avg(Calc("error_rate")),
 			},
@@ -82,28 +90,15 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 		return
 	}
 
-	// Take only the top 20
-	if len(result) > 20 {
-		result = result[:20]
-	}
-
-	numPeriods := 0
-	// Print headers
-	fmt.Fprint(resp, "# ")
+	// Calculate the overall average error rate
+	totalErrorRate := float64(0)
 	for _, row := range result {
-		numPeriods = row.NumPeriods
-		fmt.Fprint(resp, row.Dims["proxy_host"])
-		fmt.Fprint(resp, "\t")
+		totalErrorRate += row.Summaries["avg_error_rate"]
 	}
-	fmt.Fprint(resp, "\n")
+	avgErrorRate := totalErrorRate / float64(len(result))
 
-	for i := 0; i < numPeriods; i++ {
-		fmt.Fprint(resp, i)
-		fmt.Fprint(resp, "\t")
-		for _, row := range result {
-			fmt.Fprint(resp, row.Fields["error_rate"][i])
-			fmt.Fprint(resp, "\t")
-		}
-		fmt.Fprint(resp, "\n")
+	fmt.Fprintf(resp, "Average error rate: %f\n\n", avgErrorRate)
+	for _, row := range result {
+		fmt.Fprintf(resp, "%v : %f / %f -> %f\n", row.Dims["proxy_host"], row.Summaries["total_error_count"], row.Summaries["total_success_count"], row.Summaries["avg_error_rate"])
 	}
 }
