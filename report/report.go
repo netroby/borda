@@ -42,8 +42,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 
 func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 	aq := &AggregateQuery{
-		Resolution: 2 * time.Minute,
-		Dims:       []string{"proxy_host"},
+		Dims: []string{"proxy_host"},
 		Fields: []DerivedField{
 			DerivedField{
 				Name: "success_count",
