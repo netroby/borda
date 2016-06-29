@@ -29,7 +29,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	resp.Header().Set("Content-Type", "text/csv")
-	switch strings.ToLower(req.URL.Path) {
+	switch strings.ToLower(req.URL.Path)[1:] {
 	case "byerrorrate":
 		h.byErrorRate(resp)
 	default:
