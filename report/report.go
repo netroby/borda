@@ -55,7 +55,7 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 			},
 			DerivedField{
 				Name: "error_rate",
-				Expr: Avg(Calc("error_rate")),
+				Expr: Avg(Calc("success_count > 0 ? error_count / success_count")),
 			},
 		},
 		OrderBy: map[string]Order{
@@ -65,7 +65,7 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 
 	q := &Query{
 		Table:  "combined",
-		Fields: []string{"success_count", "error_count", "error_rate"},
+		Fields: []string{"success_count", "error_count"},
 		From:   time.Now().Add(-10 * time.Minute),
 	}
 
