@@ -98,6 +98,7 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 
 	for i := 0; i < numPeriods; i++ {
 		fmt.Fprint(resp, i)
+		fmt.Fprint(resp, "\t")
 		for _, row := range result {
 			fmt.Fprint(resp, row.Fields["error_rate"][i])
 			fmt.Fprint(resp, "\t")
