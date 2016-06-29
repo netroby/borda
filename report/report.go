@@ -42,7 +42,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 
 func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 	aq := &AggregateQuery{
-		Resolution: 5 * time.Minute,
+		Resolution: 2 * time.Minute,
 		Dims:       []string{"proxy_host"},
 		Fields: []DerivedField{
 			DerivedField{
@@ -66,8 +66,7 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 	q := &Query{
 		Table:  "combined",
 		Fields: []string{"success_count", "error_count", "error_rate"},
-		From:   time.Now().Add(-1 * time.Hour),
-		To:     time.Now().Add(-15 * time.Minute),
+		From:   time.Now().Add(-10 * time.Minute),
 	}
 
 	result, err := aq.Run(h.DB, q)
