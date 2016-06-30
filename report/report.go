@@ -135,15 +135,15 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Fprintf(resp, "# -------- %v --------\n", table)
-	fmt.Fprintf(resp, "# From: %v\n", from)
-	fmt.Fprintf(resp, "# To: %v\n", to)
+	fmt.Fprintf(resp, "# From:       %v\n", from)
+	fmt.Fprintf(resp, "# To:         %v\n", to)
 	fmt.Fprintf(resp, "# Resolution: %v\n", resolution)
 	for _, field := range strings.Split(fieldsString, ";") {
 		parts := strings.Split(field, ":")
-		fmt.Fprintf(resp, "# Select: %v -> %v\n", parts[0], parts[1])
+		fmt.Fprintf(resp, "# Select:     %v -> %v\n", parts[0], parts[1])
 	}
-	fmt.Fprintf(resp, "# Group By: %v\n", groupByString)
-	fmt.Fprintf(resp, "# Order By: %v\n\n", orderByString)
+	fmt.Fprintf(resp, "# Group By:   %v\n", groupByString)
+	fmt.Fprintf(resp, "# Order By:   %v\n\n", orderByString)
 
 	fmt.Fprintf(resp, "# ")
 	for i, dim := range groupBy {
