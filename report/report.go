@@ -85,20 +85,20 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		fields[parts[0]] = e
 	}
 
-	groupByString := query.Get("group")
+	groupByString := query.Get("groupby")
 	if groupByString == "" {
-		badRequest(resp, "Missing group in querystring")
+		badRequest(resp, "Missing groupby in querystring")
 		return
 	}
 	groupBy := strings.Split(groupByString, ";")
 
 	orderBy := make(map[string]bool, 0)
-	orderByString := query.Get("order")
+	orderByString := query.Get("orderby")
 	if orderByString != "" {
 		for _, order := range strings.Split("orderByString", ";") {
 			parts := strings.Split(order, ":")
 			if len(parts) > 2 {
-				badRequest(resp, "order needs to be of the form field_a:true;field_b;field_c:false", orderByString, err)
+				badRequest(resp, "orderby needs to be of the form field_a:true;field_b;field_c:false", orderByString, err)
 				return
 			}
 			if len(parts) == 1 {
