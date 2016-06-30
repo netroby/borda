@@ -3,6 +3,7 @@ package report
 import (
 	"fmt"
 	"net/http"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -137,7 +138,10 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(resp, "# From: %v\n", from)
 	fmt.Fprintf(resp, "# To: %v\n", to)
 	fmt.Fprintf(resp, "# Resolution: %v\n", resolution)
-	fmt.Fprintf(resp, "# Select: %v\n", fieldsString)
+	for _, field := range strings.Split(fieldsString, ";") {
+		parts := strings.Split(field, ":")
+		fmt.Fprintf(resp, "# Select: %v as %v\n", parts[1], parts[0])
+	}
 	fmt.Fprintf(resp, "# Group By: %v\n", groupByString)
 	fmt.Fprintf(resp, "# Order By: %v\n\n", orderByString)
 
@@ -149,7 +153,14 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Fprintf(resp, format, dim)
 	}
+
+	sortedFields := make([]string, 0, len(fields))
 	for field := range fields {
+		sortedFields = append(sortedFields, field)
+	}
+	sort.Strings(sortedFields)
+
+	for _, field := range sortedFields {
 		fmt.Fprintf(resp, "%20v", field)
 	}
 	fmt.Fprint(resp, "\n")
@@ -158,7 +169,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		for _, dim := range groupBy {
 			fmt.Fprintf(resp, "%-20v", row.Dims[dim])
 		}
-		for field := range fields {
+		for _, field := range sortedFields {
 			fmt.Fprintf(resp, "%20.4f", row.Totals[field].Get())
 		}
 		fmt.Fprint(resp, "\n")
