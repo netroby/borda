@@ -80,6 +80,6 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 		for i := 0; i < len(row.Fields["error_count"]); i++ {
 			actualErrorCount += row.Fields["error_count"][i].Get()
 		}
-		fmt.Fprintf(resp, "%v : %f (%f) / %f -> %f\n", row.Dims["proxy_host"], row.Fields["error_count"].Get(), actualErrorCount, row.Totals["success_count"].Get(), row.Totals["error_rate"].Get())
+		fmt.Fprintf(resp, "%v : %f (%f) / %f -> %f\n", row.Dims["proxy_host"], row.Totals["error_count"].Get(), actualErrorCount, row.Totals["success_count"].Get(), row.Totals["error_rate"].Get())
 	}
 }
