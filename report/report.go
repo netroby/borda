@@ -141,8 +141,13 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(resp, "# Group By: %v\n", groupByString)
 	fmt.Fprintf(resp, "# Order By: %v\n\n", orderByString)
 
-	for _, dim := range groupBy {
-		fmt.Fprintf(resp, "%-20v", dim)
+	fmt.Fprintf(resp, "# ")
+	for i, dim := range groupBy {
+		format := "%-20v"
+		if i == 0 {
+			format = "%-18v"
+		}
+		fmt.Fprintf(resp, format, dim)
 	}
 	for field := range fields {
 		fmt.Fprintf(resp, "%20v", field)
@@ -158,24 +163,6 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Fprint(resp, "\n")
 	}
-
-	//
-	// 	Dims:       []string{"proxy_host"},
-	// 	Resolution: 15 * time.Minute,
-	// 	Fields: map[string]Expr{
-	// 		"success_count": Sum("success_count"),
-	// 		"error_count":   Sum("error_count"),
-	// 		"error_rate":    Div(Sum("error_count"), Add(Sum("error_count"), Sum("success_count"))),
-	// 	},
-	// 	OrderBy: map[string]Order{
-	// 		"error_rate": ORDER_DESC,
-	// 	},
-	// }
-
-	// q := &Query{
-	// 	Table: "proxies",
-	// 	From:  time.Now().Add(-1 * time.Hour),
-	// }
 }
 
 func badRequest(resp http.ResponseWriter, msg string, args ...interface{}) {
