@@ -87,7 +87,7 @@ func (h *Handler) Report() {
 		delta := time.Now().Sub(start)
 		measurements := float64(atomic.SwapInt64(&h.receivedMeasurements, 0))
 		tps := measurements / delta.Seconds()
-		log.Debugf("Processed %f measurements per second", tps)
+		log.Debugf("Processed %d measurements per second", int(tps))
 		start = time.Now()
 	}
 }
