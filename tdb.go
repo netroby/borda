@@ -11,13 +11,14 @@ import (
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
 func TDBSave(dir string) (SaveFunc, *tdb.DB, error) {
 	resolution := 1 * time.Minute
-	hotPeriod := 2 * time.Minute
+	hotPeriod := 5 * time.Minute
+	retentionPeriod := 1 * time.Hour
 
 	db := tdb.NewDB(&tdb.DBOpts{
 		Dir:       dir,
 		BatchSize: 1000,
 	})
-	err := db.CreateTable("combined", resolution, hotPeriod, 15*time.Minute, map[string]Expr{
+	err := db.CreateTable("combined", resolution, hotPeriod, retentionPeriod, map[string]Expr{
 		"success_count": Sum("success_count"),
 		"error_count":   Sum("error_count"),
 	})
