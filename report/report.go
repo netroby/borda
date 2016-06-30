@@ -145,7 +145,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(resp, "%-20v", dim)
 	}
 	for field := range fields {
-		fmt.Fprintf(resp, "%-20v", field)
+		fmt.Fprintf(resp, "%20v", field)
 	}
 	fmt.Fprint(resp, "\n")
 
