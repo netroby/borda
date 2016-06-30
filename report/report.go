@@ -3,7 +3,6 @@ package report
 import (
 	"fmt"
 	"net/http"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -72,6 +71,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 	fields := make(map[string]expr.Expr, 0)
+	var sortedFields []string
 	for _, field := range strings.Split(fieldsString, ";") {
 		parts := strings.Split(field, ":")
 		if len(parts) != 2 {
@@ -84,6 +84,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 		fields[parts[0]] = e
+		sortedFields = append(sortedFields, parts[0])
 	}
 
 	groupByString := query.Get("groupby")
@@ -153,12 +154,6 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Fprintf(resp, format, dim)
 	}
-
-	sortedFields := make([]string, 0, len(fields))
-	for field := range fields {
-		sortedFields = append(sortedFields, field)
-	}
-	sort.Strings(sortedFields)
 
 	for _, field := range sortedFields {
 		fmt.Fprintf(resp, "%20v", field)
