@@ -60,9 +60,8 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 	}
 
 	q := &Query{
-		Table:  "combined",
-		Fields: []string{"success_count", "error_count"},
-		From:   time.Now().Add(-1 * time.Hour),
+		Table: "proxies",
+		From:  time.Now().Add(-1 * time.Hour),
 	}
 
 	result, err := aq.Run(h.DB, q)
