@@ -44,33 +44,15 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 	aq := &AggregateQuery{
 		Dims:       []string{"proxy_host"},
 		Resolution: 15 * time.Minute,
-		Fields: []DerivedField{
-			DerivedField{
-				Name: "success_count",
-				Expr: Calc("success_count"),
-			},
-			DerivedField{
-				Name: "error_count",
-				Expr: Calc("error_count"),
-			},
-			DerivedField{
-				Name: "error_rate",
-				Expr: Avg(Calc("success_count > 0 ? error_count / success_count")),
-			},
+		Fields: map[string]Expr{
+			"success_count": Sum("success_count"),
+			"error_count":   Sum("error_count"),
+			"error_rate":    Avg("error_rate"),
 		},
-		Summaries: []DerivedField{
-			DerivedField{
-				Name: "total_success_count",
-				Expr: Calc("success_count"),
-			},
-			DerivedField{
-				Name: "total_error_count",
-				Expr: Calc("error_count"),
-			},
-			DerivedField{
-				Name: "avg_error_rate",
-				Expr: Avg(Calc("error_rate")),
-			},
+		Summaries: map[string]Expr{
+			"total_success_count": Sum("success_count"),
+			"total_error_count":   Sum("error_count"),
+			"avg_error_rate":      Avg("error_rate"),
 		},
 		OrderBy: map[string]Order{
 			"avg_error_rate": ORDER_DESC,
@@ -93,13 +75,13 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 	// Calculate the overall average error rate
 	totalErrorRate := float64(0)
 	for _, row := range result {
-		totalErrorRate += row.Summaries["avg_error_rate"]
+		totalErrorRate += row.Summaries["avg_error_rate"].Get()
 	}
 	avgErrorRate := totalErrorRate / float64(len(result))
 
 	fmt.Fprintln(resp, "---- Proxies by Error Rate ----")
 	fmt.Fprintf(resp, "Average error rate: %f\n\n", avgErrorRate)
 	for _, row := range result {
-		fmt.Fprintf(resp, "%v : %f / %f -> %f\n", row.Dims["proxy_host"], row.Summaries["total_error_count"], row.Summaries["total_success_count"], row.Summaries["avg_error_rate"])
+		fmt.Fprintf(resp, "%v : %f / %f -> %f\n", row.Dims["proxy_host"], row.Summaries["total_error_count"].Get(), row.Summaries["total_success_count"].Get(), row.Summaries["avg_error_rate"].Get())
 	}
 }
