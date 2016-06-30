@@ -52,7 +52,7 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 		Summaries: map[string]Expr{
 			"total_success_count": Sum("success_count"),
 			"total_error_count":   Sum("error_count"),
-			"avg_error_rate":      Div("total_error_count", Add("total_success_count", "total_error_count")),
+			"avg_error_rate":      Div(Sum("error_count"), Add(Sum("success_count"), Sum("error_count"))),
 		},
 		OrderBy: map[string]Order{
 			"avg_error_rate": ORDER_DESC,
