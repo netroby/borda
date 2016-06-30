@@ -53,6 +53,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	now := time.Now()
 	from := now.Add(-1 * fromOffset)
 
+	to := now
 	toString := query.Get("to")
 	toOffset := 0 * time.Second
 	if toString != "" {
@@ -61,8 +62,8 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 			badRequest(resp, "Error parsing to offset %v: %v", toString, err)
 			return
 		}
+		to = now.Add(-1 * toOffset)
 	}
-	to := now.Add(-1 * toOffset)
 
 	fieldsString := query.Get("select")
 	if fieldsString == "" {
