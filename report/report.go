@@ -71,10 +71,10 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 	fields := make(map[string]expr.Expr, 0)
-	for _, field := range strings.Split(fieldsString, ",") {
+	for _, field := range strings.Split(fieldsString, ";") {
 		parts := strings.Split(field, ":")
 		if len(parts) != 2 {
-			badRequest(resp, "select needs to be of the form field_a:Sum('a'),field_b:Add(1, 'b')", fieldsString, err)
+			badRequest(resp, "select needs to be of the form field_a:Sum('a');field_b:Add(1, 'b')", fieldsString, err)
 			return
 		}
 		e, parseErr := expr.JS(parts[1])
@@ -90,15 +90,15 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		badRequest(resp, "Missing group in querystring")
 		return
 	}
-	groupBy := strings.Split(groupByString, ",")
+	groupBy := strings.Split(groupByString, ";")
 
 	orderBy := make(map[string]bool, 0)
 	orderByString := query.Get("order")
 	if orderByString != "" {
-		for _, order := range strings.Split("orderByString", ",") {
+		for _, order := range strings.Split("orderByString", ";") {
 			parts := strings.Split(order, ":")
 			if len(parts) > 2 {
-				badRequest(resp, "order needs to be of the form field_a:true,field_b,field_c:false", orderByString, err)
+				badRequest(resp, "order needs to be of the form field_a:true;field_b;field_c:false", orderByString, err)
 				return
 			}
 			if len(parts) == 1 {
