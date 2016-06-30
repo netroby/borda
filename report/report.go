@@ -3,12 +3,13 @@ package report
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/getlantern/golog"
 	. "github.com/oxtoacart/tdb"
-	. "github.com/oxtoacart/tdb/expr"
+	"github.com/oxtoacart/tdb/expr"
 )
 
 var (
@@ -19,8 +20,8 @@ type Handler struct {
 	DB *DB
 }
 
-// ServeHTTP implements the http.Handler interface and supports getting reports
-// via HTTP.
+// ServeHTTP implements the http.Handler interface and supports querying via
+// HTTP.
 func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodGet {
 		resp.WriteHeader(http.StatusMethodNotAllowed)
@@ -29,54 +30,154 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	resp.Header().Set("Content-Type", "text/plain")
-	switch strings.ToLower(req.URL.Path)[1:] {
-	case "byerrorrate":
-		h.byErrorRate(resp)
-	default:
-		log.Errorf("No report for path %v", req.URL.Path)
-		http.NotFound(resp, req)
+	table := strings.ToLower(req.URL.Path)[1:]
+	if table == "" {
+		badRequest(resp, "Missing table in path")
 		return
 	}
 
-}
-
-func (h *Handler) byErrorRate(resp http.ResponseWriter) {
-	aq := &AggregateQuery{
-		Dims:       []string{"proxy_host"},
-		Resolution: 15 * time.Minute,
-		Fields: map[string]Expr{
-			"success_count": Sum("success_count"),
-			"error_count":   Sum("error_count"),
-			"error_rate":    Div(Sum("error_count"), Add(Sum("error_count"), Sum("success_count"))),
-		},
-		OrderBy: map[string]Order{
-			"error_rate": ORDER_DESC,
-		},
+	query := req.URL.Query()
+	resolutionString := query.Get("resolution")
+	resolution, err := time.ParseDuration(resolutionString)
+	if err != nil {
+		badRequest(resp, "Error parsing resolution %v: %v", resolutionString, err)
+		return
 	}
 
-	q := &Query{
-		Table: "proxies",
-		From:  time.Now().Add(-1 * time.Hour),
+	fromString := query.Get("from")
+	fromOffset, err := time.ParseDuration(fromString)
+	if err != nil {
+		badRequest(resp, "Error parsing from offset %v: %v", fromString, err)
+		return
+	}
+	now := time.Now()
+	from := now.Add(-1 * fromOffset)
+
+	toString := query.Get("to")
+	toOffset := 0 * time.Second
+	if toString != "" {
+		toOffset, err = time.ParseDuration(toString)
+		if err != nil {
+			badRequest(resp, "Error parsing to offset %v: %v", toString, err)
+			return
+		}
+	}
+	to := now.Add(-1 * toOffset)
+
+	fieldsString := query.Get("select")
+	if fieldsString == "" {
+		badRequest(resp, "Missing select in querystring")
+		return
+	}
+	fields := make(map[string]expr.Expr, 0)
+	for _, field := range strings.Split(fieldsString, ",") {
+		parts := strings.Split(field, ":")
+		if len(parts) != 2 {
+			badRequest(resp, "select needs to be of the form field_a:Sum('a'),field_b:Add(1, 'b')", fieldsString, err)
+			return
+		}
+		e, parseErr := expr.JS(parts[1])
+		if parseErr != nil {
+			badRequest(resp, "Unable to parse expression %v for field %v: %v", parts[1], parts[0], parseErr)
+			return
+		}
+		fields[parts[0]] = e
 	}
 
-	result, err := aq.Run(h.DB, q)
+	groupByString := query.Get("group")
+	if groupByString == "" {
+		badRequest(resp, "Missing group in querystring")
+		return
+	}
+	groupBy := strings.Split(groupByString, ",")
+
+	orderBy := make(map[string]bool, 0)
+	orderByString := query.Get("order")
+	if orderByString != "" {
+		for _, order := range strings.Split("orderByString", ",") {
+			parts := strings.Split(order, ":")
+			if len(parts) > 2 {
+				badRequest(resp, "order needs to be of the form field_a:true,field_b,field_c:false", orderByString, err)
+				return
+			}
+			if len(parts) == 1 {
+				// Default to descending ordering
+				orderBy[parts[0]] = false
+				continue
+			}
+			asc, parseErr := strconv.ParseBool(parts[1])
+			if parseErr != nil {
+				badRequest(resp, "Unable to parse boolean %v: %v", parts[1], parseErr)
+				return
+			}
+			orderBy[parts[0]] = asc
+		}
+	}
+
+	aq := h.DB.Aggregate(table, resolution)
+	for field, e := range fields {
+		aq.Select(field, e)
+	}
+	for _, dim := range groupBy {
+		aq.GroupBy(dim)
+	}
+	for field, asc := range orderBy {
+		aq.OrderBy(field, asc)
+	}
+
+	result, err := aq.Run()
 	if err != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(resp, "%v\n", err)
 		return
 	}
 
-	// Calculate the overall average error rate
-	totalErrorRate := float64(0)
-	for _, row := range result {
-		totalErrorRate += row.Totals["error_rate"].Get()
-	}
-	avgErrorRate := totalErrorRate / float64(len(result))
+	fmt.Fprintf(resp, "# -------- %v --------\n", table)
+	fmt.Fprintf(resp, "# From: %v\n", from)
+	fmt.Fprintf(resp, "# To: %v\n", to)
+	fmt.Fprintf(resp, "# Resolution: %v\n", resolution)
+	fmt.Fprintf(resp, "# Select: %v\n", fieldsString)
+	fmt.Fprintf(resp, "# Group By: %v\n", groupByString)
+	fmt.Fprintf(resp, "# Order By: %v\n\n", orderByString)
 
-	fmt.Fprintln(resp, "# ---- Proxies by Error Rate ----")
-	fmt.Fprintf(resp, "# Average error rate: %f\n\n", avgErrorRate)
-	fmt.Fprintln(resp, "# proxy_host              errors    requests  error_rate")
-	for _, row := range result {
-		fmt.Fprintf(resp, "%-20v%12.4f%12.4f%12.4f\n", row.Dims["proxy_host"], row.Totals["error_count"].Get(), row.Totals["success_count"].Get()+row.Totals["error_count"].Get(), row.Totals["error_rate"].Get())
+	for _, dim := range groupBy {
+		fmt.Fprintf(resp, "%-20v", dim)
 	}
+	for field := range fields {
+		fmt.Fprintf(resp, "%-20v", field)
+	}
+	fmt.Fprint(resp, "\n")
+
+	for _, row := range result {
+		for _, dim := range groupBy {
+			fmt.Fprintf(resp, "%-20v", row.Dims[dim])
+		}
+		for field := range fields {
+			fmt.Fprintf(resp, "%20.4f", row.Totals[field].Get())
+		}
+		fmt.Fprint(resp, "\n")
+	}
+
+	//
+	// 	Dims:       []string{"proxy_host"},
+	// 	Resolution: 15 * time.Minute,
+	// 	Fields: map[string]Expr{
+	// 		"success_count": Sum("success_count"),
+	// 		"error_count":   Sum("error_count"),
+	// 		"error_rate":    Div(Sum("error_count"), Add(Sum("error_count"), Sum("success_count"))),
+	// 	},
+	// 	OrderBy: map[string]Order{
+	// 		"error_rate": ORDER_DESC,
+	// 	},
+	// }
+
+	// q := &Query{
+	// 	Table: "proxies",
+	// 	From:  time.Now().Add(-1 * time.Hour),
+	// }
+}
+
+func badRequest(resp http.ResponseWriter, msg string, args ...interface{}) {
+	resp.WriteHeader(http.StatusBadRequest)
+	fmt.Fprintf(resp, msg+"\n", args...)
 }
