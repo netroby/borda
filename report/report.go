@@ -49,13 +49,8 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 			"error_count":   Sum("error_count"),
 			"error_rate":    Avg("error_rate"),
 		},
-		Summaries: map[string]Expr{
-			"total_success_count": Sum("success_count"),
-			"total_error_count":   Sum("error_count"),
-			"avg_error_rate":      Div(Sum("error_count"), Add(Sum("success_count"), Sum("error_count"))),
-		},
 		OrderBy: map[string]Order{
-			"avg_error_rate": ORDER_DESC,
+			"error_rate": ORDER_DESC,
 		},
 	}
 
@@ -74,14 +69,13 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 	// Calculate the overall average error rate
 	totalErrorRate := float64(0)
 	for _, row := range result {
-		totalErrorRate += row.Summaries["avg_error_rate"].Get()
+		totalErrorRate += row.Totals["error_rate"].Get()
 	}
 	avgErrorRate := totalErrorRate / float64(len(result))
 
 	fmt.Fprintln(resp, "---- Proxies by Error Rate ----")
 	fmt.Fprintf(resp, "Average error rate: %f\n\n", avgErrorRate)
 	for _, row := range result {
-		log.Debugf("%v : %f", row.Dims["proxy_host"], row.Fields["success_count"][0].Get())
-		fmt.Fprintf(resp, "%v : %f / %f -> %f\n", row.Dims["proxy_host"], row.Summaries["total_error_count"].Get(), row.Summaries["total_success_count"].Get(), row.Summaries["avg_error_rate"].Get())
+		fmt.Fprintf(resp, "%v : %f / %f -> %f\n", row.Dims["proxy_host"], row.Totals["error_count"].Get(), row.Totals["success_count"].Get(), row.Totals["error_rate"].Get())
 	}
 }
