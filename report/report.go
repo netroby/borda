@@ -179,6 +179,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 }
 
 func badRequest(resp http.ResponseWriter, msg string, args ...interface{}) {
+	log.Errorf(msg, args...)
 	resp.WriteHeader(http.StatusBadRequest)
 	fmt.Fprintf(resp, msg+"\n", args...)
 }
