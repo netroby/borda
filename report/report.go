@@ -122,6 +122,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	for _, dim := range groupBy {
 		aq.GroupBy(dim)
 	}
+	log.Debug(orderBy)
 	for field, asc := range orderBy {
 		aq.OrderBy(field, asc)
 	}
