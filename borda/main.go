@@ -60,6 +60,7 @@ func main() {
 	fmt.Fprintf(os.Stdout, "Listening for HTTPS connections at %v\n", hl.Addr())
 
 	h := &borda.Handler{Save: s}
+	go h.Report()
 	serverErr := http.Serve(hl, h)
 	if serverErr != nil {
 		log.Fatalf("Error serving HTTPS: %v", serverErr)

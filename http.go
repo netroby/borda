@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync/atomic"
+	"time"
 )
 
 const (
@@ -17,7 +19,8 @@ const (
 // Handler is an http.Handler that reads Measurements from HTTP and saves them
 // to the database.
 type Handler struct {
-	Save SaveFunc
+	Save                 SaveFunc
+	receivedMeasurements int64
 }
 
 // ServeHTTP implements the http.Handler interface and supports publishing measurements via HTTP.
@@ -65,7 +68,8 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	log.Debugf("Received %d measurements", len(measurements))
+	atomic.AddInt64(&h.receivedMeasurements, int64(len(measurements)))
+	log.Tracef("Received %d measurements", len(measurements))
 	for _, m := range measurements {
 		err := h.Save(m)
 		if err != nil {
@@ -74,6 +78,18 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	resp.WriteHeader(http.StatusCreated)
+}
+
+func (h *Handler) Report() {
+	start := time.Now()
+	ticker := time.NewTicker(15 * time.Second)
+	for range ticker.C {
+		delta := time.Now().Sub(start)
+		measurements := float64(atomic.SwapInt64(&h.receivedMeasurements, 0))
+		tps := measurements / delta.Seconds()
+		log.Debugf("Processed %f measurements per second", tps)
+		start = time.Now()
+	}
 }
 
 func badRequest(resp http.ResponseWriter, msg string, args ...interface{}) {
