@@ -115,7 +115,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	aq := h.DB.Aggregate(table, resolution)
+	aq := h.DB.Aggregate(table, resolution).From(from).To(to)
 	for field, e := range fields {
 		aq.Select(field, e)
 	}
