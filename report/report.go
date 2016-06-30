@@ -95,7 +95,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	orderBy := make(map[string]bool, 0)
 	orderByString := query.Get("orderby")
 	if orderByString != "" {
-		for _, order := range strings.Split("orderByString", ";") {
+		for _, order := range strings.Split(orderByString, ";") {
 			parts := strings.Split(order, ":")
 			if len(parts) > 2 {
 				badRequest(resp, "orderby needs to be of the form field_a:true;field_b;field_c:false", orderByString, err)
@@ -122,7 +122,6 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	for _, dim := range groupBy {
 		aq.GroupBy(dim)
 	}
-	log.Debug(orderBy)
 	for field, asc := range orderBy {
 		aq.OrderBy(field, asc)
 	}
