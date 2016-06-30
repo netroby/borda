@@ -81,6 +81,7 @@ func (h *Handler) byErrorRate(resp http.ResponseWriter) {
 	fmt.Fprintln(resp, "---- Proxies by Error Rate ----")
 	fmt.Fprintf(resp, "Average error rate: %f\n\n", avgErrorRate)
 	for _, row := range result {
+		log.Debugf("%v : %f", row.Dims["proxy_host"], row.Fields["success_count"][0].Get())
 		fmt.Fprintf(resp, "%v : %f / %f -> %f\n", row.Dims["proxy_host"], row.Summaries["total_error_count"].Get(), row.Summaries["total_success_count"].Get(), row.Summaries["avg_error_rate"].Get())
 	}
 }

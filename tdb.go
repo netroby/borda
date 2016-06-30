@@ -25,15 +25,7 @@ func TDBSave(dir string) (SaveFunc, *tdb.DB, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	err = db.CreateTable("proxies", resolution, hotPeriod, 31*24*time.Hour, map[string]Expr{
-		"success_count": Sum("success_count"),
-		"error_count":   Sum("error_count"),
-		"error_rate":    Avg(Div("error_count", Add("success_count", "error_count"))),
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-	err = db.CreateView("combined", "proxies", "proxy_host")
+	err = db.CreateView("combined", "proxies", resolution, hotPeriod, 31*24*time.Hour, "proxy_host")
 	if err != nil {
 		return nil, nil, err
 	}
