@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/getlantern/golog"
 	"github.com/oxtoacart/tdb"
 )
@@ -71,9 +72,16 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(resp, "------------- %v ----------------\n", result.Table)
 	fmt.Fprintln(resp, sql)
 	fmt.Fprintln(resp)
-	fmt.Fprintf(resp, "# From:       %v\n", result.From)
-	fmt.Fprintf(resp, "# To:         %v\n", result.To)
-	fmt.Fprintf(resp, "# Resolution: %v\n\n", result.Resolution)
+	fmt.Fprintf(resp, "# From:        %v\n", result.From)
+	fmt.Fprintf(resp, "# To:          %v\n", result.To)
+	fmt.Fprintf(resp, "# Resolution:  %v\n\n", result.Resolution)
+
+	fmt.Fprintln(resp, "# Statistics")
+	fmt.Fprintf(resp, "# Scanned:     %v\n", humanize.Comma(result.Stats.Scanned))
+	fmt.Fprintf(resp, "# Filter Pass: %v\n", humanize.Comma(result.Stats.FilterPass))
+	fmt.Fprintf(resp, "# Read Value:  %v\n", humanize.Comma(result.Stats.ReadValue))
+	fmt.Fprintf(resp, "# Valid:       %v\n", humanize.Comma(result.Stats.DataValid))
+	fmt.Fprintf(resp, "# Included:    %v\n\n", humanize.Comma(result.Stats.Included))
 
 	fmt.Fprintf(resp, "# %-33v", "time")
 
