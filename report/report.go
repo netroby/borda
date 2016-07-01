@@ -3,7 +3,6 @@ package report
 import (
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/getlantern/golog"
@@ -28,12 +27,6 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	resp.Header().Set("Content-Type", "text/plain")
-	table := strings.ToLower(req.URL.Path)[1:]
-	if table == "" {
-		badRequest(resp, "Missing table in path")
-		return
-	}
-
 	aq, err := h.DB.SQLQuery(req.URL.RawQuery)
 	if err != nil {
 		badRequest(resp, err.Error())
@@ -47,7 +40,6 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(resp, "# -------- %v --------\n", table)
 	fmt.Fprintln(resp, "-----------------------------")
 	fmt.Fprintln(resp, req.URL.RawQuery)
 	fmt.Fprintln(resp)
