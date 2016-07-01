@@ -90,7 +90,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		for i := 0; i < numPeriods; i++ {
 			fmt.Fprintf(resp, "%-35v", result.To.Add(-1*time.Duration(i)*result.Resolution).Format(time.RFC1123))
 			for _, dim := range result.Dims {
-				fmt.Fprintf(resp, "'%v'", entry.Dims[dim])
+				fmt.Fprintf(resp, "%-20v", entry.Dims[dim])
 			}
 			for _, field := range result.FieldOrder {
 				fmt.Fprintf(resp, "%20.4f", entry.Fields[field][i].Get())
