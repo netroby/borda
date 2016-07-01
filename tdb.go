@@ -19,8 +19,8 @@ func TDBSave(dir string) (SaveFunc, *tdb.DB, error) {
 		BatchSize: 1000,
 	})
 	err := db.CreateTable("combined", resolution, hotPeriod, retentionPeriod, map[string]Expr{
-		"success_count": Sum("success_count"),
-		"error_count":   Sum("error_count"),
+		"success_count": SUM("success_count"),
+		"error_count":   SUM("error_count"),
 	})
 	if err != nil {
 		return nil, nil, err
