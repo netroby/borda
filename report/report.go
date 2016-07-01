@@ -68,12 +68,12 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(resp, "------------- %v ----------------\n\n", result.Table)
+	fmt.Fprintf(resp, "------------- %v ----------------\n", result.Table)
 	fmt.Fprintln(resp, sql)
 	fmt.Fprintln(resp)
 	fmt.Fprintf(resp, "# From:       %v\n", result.From)
 	fmt.Fprintf(resp, "# To:         %v\n", result.To)
-	fmt.Fprintf(resp, "# Resolution: %v\n", result.Resolution)
+	fmt.Fprintf(resp, "# Resolution: %v\n\n", result.Resolution)
 
 	fmt.Fprintf(resp, "# %-33v", "time")
 	for _, dim := range result.Dims {
