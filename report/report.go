@@ -149,7 +149,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(resp, "# Group By:   %v\n", strings.Join(result.Dims, ";"))
 	fmt.Fprintf(resp, "# Order By:   %v\n\n", orderByString)
 
-	fmt.Fprintf(resp, "# %-32v", "time")
+	fmt.Fprintf(resp, "# %-33v", "time")
 	for _, dim := range result.Dims {
 		fmt.Fprintf(resp, "%-20v", dim)
 	}
