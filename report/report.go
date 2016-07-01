@@ -27,11 +27,39 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	resp.Header().Set("Content-Type", "text/plain")
-	aq, err := h.DB.SQLQuery(req.URL.RawQuery)
+	query := req.URL.Query()
+	sql := query.Get("sql")
+	if sql == "" {
+		badRequest(resp, "Please specify some sql")
+		return
+	}
+
+	fromString := query.Get("from")
+	fromOffset, err := time.ParseDuration(fromString)
+	if err != nil {
+		badRequest(resp, "Error parsing from offset %v: %v", fromString, err)
+		return
+	}
+	now := time.Now()
+	from := now.Add(-1 * fromOffset)
+
+	to := now
+	toString := query.Get("to")
+	toOffset := 0 * time.Second
+	if toString != "" {
+		toOffset, err = time.ParseDuration(toString)
+		if err != nil {
+			badRequest(resp, "Error parsing to offset %v: %v", toString, err)
+			return
+		}
+		to = now.Add(-1 * toOffset)
+	}
+	aq, err := h.DB.SQLQuery(sql)
 	if err != nil {
 		badRequest(resp, err.Error())
 		return
 	}
+	aq.From(from).To(to)
 
 	result, err := aq.Run()
 	if err != nil {
@@ -40,8 +68,8 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprintln(resp, "-----------------------------")
-	fmt.Fprintln(resp, req.URL.RawQuery)
+	fmt.Fprintf(resp, "------------- %v ----------------\n\n", result.Table)
+	fmt.Fprintln(resp, sql)
 	fmt.Fprintln(resp)
 	fmt.Fprintf(resp, "# From:       %v\n", result.From)
 	fmt.Fprintf(resp, "# To:         %v\n", result.To)
