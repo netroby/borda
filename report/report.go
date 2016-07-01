@@ -149,13 +149,9 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(resp, "# Group By:   %v\n", strings.Join(result.Dims, ";"))
 	fmt.Fprintf(resp, "# Order By:   %v\n\n", orderByString)
 
-	fmt.Fprintf(resp, "# ")
-	for i, dim := range result.Dims {
-		format := "%-20v"
-		if i == 0 {
-			format = "%-18v"
-		}
-		fmt.Fprintf(resp, format, dim)
+	fmt.Fprintf(resp, "#%-20v", "time")
+	for _, dim := range result.Dims {
+		fmt.Fprintf(resp, "%-20v", dim)
 	}
 
 	for _, field := range sortedFields {
@@ -163,14 +159,18 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Fprint(resp, "\n")
 
+	numPeriods := int(result.To.Sub(result.From) / result.Resolution)
 	for _, entry := range result.Entries {
-		for _, dim := range result.Dims {
-			fmt.Fprintf(resp, "%-20v", entry.Dims[dim])
+		for i := 0; i < numPeriods; i++ {
+			fmt.Fprintf(resp, "%-20v", result.To.Add(-1*time.Duration(i)*result.Resolution))
+			for _, dim := range result.Dims {
+				fmt.Fprintf(resp, "%-20v", entry.Dims[dim])
+			}
+			for _, field := range sortedFields {
+				fmt.Fprintf(resp, "%20.4f", entry.Fields[field][i].Get())
+			}
+			fmt.Fprint(resp, "\n")
 		}
-		for _, field := range sortedFields {
-			fmt.Fprintf(resp, "%20.4f", entry.Totals[field].Get())
-		}
-		fmt.Fprint(resp, "\n")
 	}
 }
 
