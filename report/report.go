@@ -149,7 +149,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(resp, "# Group By:   %v\n", strings.Join(result.Dims, ";"))
 	fmt.Fprintf(resp, "# Order By:   %v\n\n", orderByString)
 
-	fmt.Fprintf(resp, "# %-48v", "time")
+	fmt.Fprintf(resp, "# %-32v", "time")
 	for _, dim := range result.Dims {
 		fmt.Fprintf(resp, "%-20v", dim)
 	}
@@ -162,7 +162,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	numPeriods := int(result.To.Sub(result.From) / result.Resolution)
 	for _, entry := range result.Entries {
 		for i := 0; i < numPeriods; i++ {
-			fmt.Fprintf(resp, "%-20v", result.To.Add(-1*time.Duration(i)*result.Resolution))
+			fmt.Fprintf(resp, "%-35v", result.To.Add(-1*time.Duration(i)*result.Resolution).Format(time.RFC1123))
 			for _, dim := range result.Dims {
 				fmt.Fprintf(resp, "%-20v", entry.Dims[dim])
 			}
