@@ -37,11 +37,15 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	query := req.URL.Query()
+	resolution := 0 * time.Second
 	resolutionString := query.Get("resolution")
-	resolution, err := time.ParseDuration(resolutionString)
-	if err != nil {
-		badRequest(resp, "Error parsing resolution %v: %v", resolutionString, err)
-		return
+	if resolutionString != "" {
+		var parseErr error
+		resolution, parseErr = time.ParseDuration(resolutionString)
+		if parseErr != nil {
+			badRequest(resp, "Error parsing resolution %v: %v", resolutionString, parseErr)
+			return
+		}
 	}
 
 	fromString := query.Get("from")
@@ -87,12 +91,11 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		sortedFields = append(sortedFields, parts[0])
 	}
 
+	groupBy := []string{}
 	groupByString := query.Get("groupby")
-	if groupByString == "" {
-		badRequest(resp, "Missing groupby in querystring")
-		return
+	if groupByString != "" {
+		groupBy = strings.Split(groupByString, ";")
 	}
-	groupBy := strings.Split(groupByString, ";")
 
 	orderBy := make(map[string]bool, 0)
 	orderByString := query.Get("orderby")
@@ -117,7 +120,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	aq := h.DB.Aggregate(table, resolution).From(from).To(to)
+	aq := h.DB.Query(table, resolution).From(from).To(to)
 	for field, e := range fields {
 		aq.Select(field, e)
 	}
@@ -136,18 +139,18 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Fprintf(resp, "# -------- %v --------\n", table)
-	fmt.Fprintf(resp, "# From:       %v\n", from)
-	fmt.Fprintf(resp, "# To:         %v\n", to)
-	fmt.Fprintf(resp, "# Resolution: %v\n", resolution)
+	fmt.Fprintf(resp, "# From:       %v\n", result.From)
+	fmt.Fprintf(resp, "# To:         %v\n", result.To)
+	fmt.Fprintf(resp, "# Resolution: %v\n", result.Resolution)
 	for _, field := range strings.Split(fieldsString, ";") {
 		parts := strings.Split(field, ":")
 		fmt.Fprintf(resp, "# Select:     %v -> %v\n", parts[0], parts[1])
 	}
-	fmt.Fprintf(resp, "# Group By:   %v\n", groupByString)
+	fmt.Fprintf(resp, "# Group By:   %v\n", strings.Join(result.Dims, ";"))
 	fmt.Fprintf(resp, "# Order By:   %v\n\n", orderByString)
 
 	fmt.Fprintf(resp, "# ")
-	for i, dim := range groupBy {
+	for i, dim := range result.Dims {
 		format := "%-20v"
 		if i == 0 {
 			format = "%-18v"
@@ -160,12 +163,12 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 	fmt.Fprint(resp, "\n")
 
-	for _, row := range result {
-		for _, dim := range groupBy {
-			fmt.Fprintf(resp, "%-20v", row.Dims[dim])
+	for _, entry := range result.Entries {
+		for _, dim := range result.Dims {
+			fmt.Fprintf(resp, "%-20v", entry.Dims[dim])
 		}
 		for _, field := range sortedFields {
-			fmt.Fprintf(resp, "%20.4f", row.Totals[field].Get())
+			fmt.Fprintf(resp, "%20.4f", entry.Totals[field].Get())
 		}
 		fmt.Fprint(resp, "\n")
 	}
