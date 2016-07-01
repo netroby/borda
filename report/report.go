@@ -78,6 +78,8 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(resp, "# Resolution:  %v\n", result.Resolution)
 	fmt.Fprintf(resp, "# Dimensions:  %v\n\n", strings.Join(result.Dims, " "))
 
+	fmt.Fprintf(resp, "# Query Runtime:  %v\n\n", result.Stats.Runtime)
+
 	fmt.Fprintln(resp, "# Key Statistics")
 	fmt.Fprintf(resp, "#   Scanned:       %v\n", humanize.Comma(result.Stats.Scanned))
 	fmt.Fprintf(resp, "#   Filter Pass:   %v\n", humanize.Comma(result.Stats.FilterPass))
