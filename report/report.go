@@ -1,6 +1,7 @@
 package report
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -65,6 +66,12 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(resp, "%v\n", err)
+		return
+	}
+
+	if true {
+		enc := json.NewEncoder(resp)
+		enc.Encode(result)
 		return
 	}
 
