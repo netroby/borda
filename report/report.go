@@ -97,7 +97,8 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		groupBy = strings.Split(groupByString, ";")
 	}
 
-	orderBy := make(map[string]bool, 0)
+	var orderBy []expr.Expr
+	var orderByAsc []bool
 	orderByString := query.Get("orderby")
 	if orderByString != "" {
 		for _, order := range strings.Split(orderByString, ";") {
@@ -106,9 +107,15 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 				badRequest(resp, "orderby needs to be of the form field_a:true;field_b;field_c:false", orderByString, err)
 				return
 			}
+			e, parseErr := expr.JS(parts[0])
+			if parseErr != nil {
+				badRequest(resp, "bad expression in order by: %v: %v", parts[0], parseErr)
+				return
+			}
+			orderBy = append(orderBy, e)
 			if len(parts) == 1 {
 				// Default to descending ordering
-				orderBy[parts[0]] = false
+				orderByAsc = append(orderByAsc, false)
 				continue
 			}
 			asc, parseErr := strconv.ParseBool(parts[1])
@@ -116,7 +123,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 				badRequest(resp, "Unable to parse boolean %v: %v", parts[1], parseErr)
 				return
 			}
-			orderBy[parts[0]] = asc
+			orderByAsc = append(orderByAsc, asc)
 		}
 	}
 
@@ -127,8 +134,8 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	for _, dim := range groupBy {
 		aq.GroupBy(dim)
 	}
-	for field, asc := range orderBy {
-		aq.OrderBy(field, asc)
+	for i, e := range orderBy {
+		aq.OrderBy(e, orderByAsc[i])
 	}
 
 	result, err := aq.Run()
