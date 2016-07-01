@@ -75,10 +75,10 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(resp)
 	fmt.Fprintf(resp, "# From:        %v\n", result.From)
 	fmt.Fprintf(resp, "# To:          %v\n", result.To)
-	fmt.Fprintf(resp, "# Resolution:  %v\n\n", result.Resolution)
+	fmt.Fprintf(resp, "# Resolution:  %v\n", result.Resolution)
 	fmt.Fprintf(resp, "# Dimensions:  %v\n\n", strings.Join(result.Dims, " "))
 
-	fmt.Fprintln(resp, "# Statistics")
+	fmt.Fprintln(resp, "# Key Statistics")
 	fmt.Fprintf(resp, "#   Scanned:       %v\n", humanize.Comma(result.Stats.Scanned))
 	fmt.Fprintf(resp, "#   Filter Pass:   %v\n", humanize.Comma(result.Stats.FilterPass))
 	fmt.Fprintf(resp, "#   Read Value:    %v\n", humanize.Comma(result.Stats.ReadValue))
