@@ -71,6 +71,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	atomic.AddInt64(&h.receivedMeasurements, int64(len(measurements)))
 	log.Tracef("Received %d measurements", len(measurements))
 	for _, m := range measurements {
+		log.Debugf("'%v'", m.Dimensions["proxy_host"])
 		err := h.Save(m)
 		if err != nil {
 			log.Errorf("Error saving measurement, continuing: %v", err)
