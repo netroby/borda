@@ -9,3 +9,48 @@ a collection point for metrics from
 
 ## REST API
 [REST API Docs](http://getlantern.github.io/borda/)
+
+## Queries
+
+Queries can be made using SQL sent to either port 14443 at path `/query` or
+`/porcelain`.  `/porcelain` returns the same results as `/query` but in a more
+machine-readable form.
+
+Port 14443 is not open to the internet, so you need to tunnel.
+
+```
+ssh -L 14443:localhost:14443 lantern@borda.getlantern.org
+```
+
+Queries can be made using curl, like this:
+
+```
+curl -k -G "https://localhost:14443/query" --data-urlencode "=
+SELECT ..."
+```
+
+Here's a full example query. Keep in mind that this is valid sql except for the
+custom `ASOF` and `UNTIL` clauses.
+
+```sql
+SELECT
+    SUM(error_count) / 0.01 AS error_count,
+    SUM(success_count) / 0.01 AS success_count,
+    SUM(error_count) / SUM(error_count + success_count) AS error_rate
+FROM proxies ASOF '-1h' UNTIL '-30m'
+GROUP BY proxy_host, period(5m)
+HAVING SUM(error_rate) > 0.1
+ORDER BY SUM(error_rate) DESC
+LIMIT 100, 25"
+```
+
+This query does the following:
+
+* Selects from the `proxies` table
+* Selects values in the time range starting one hour in the past and ending 30 minutes in the past
+* Groups results into 5 minute periods
+* Groups results by the proxy_host dimensions
+* For each period, calculates three different derived fields (error_count, success_count and error_rate) using the SUM aggregation operator
+* Limits results to those where the calculated error_rate is over 0.1
+* Orders the results by the SUM of the error_rate across all periods in descending order
+* Skips the first 25 resulting rows and returns 100 of the remaining ones
