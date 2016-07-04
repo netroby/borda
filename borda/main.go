@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"time"
 
@@ -19,6 +20,7 @@ var (
 
 	httpsaddr     = flag.String("httpsaddr", ":62443", "The address at which to listen for HTTPS connections")
 	reportsaddr   = flag.String("reportsaddr", ":14443", "The address at which to listen for HTTPS connections to the reports")
+	pprofAddr     = flag.String("pprofaddr", "", "if specified, will listen for pprof connections at the specified tcp address")
 	pkfile        = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
 	certfile      = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
 	indexeddims   = flag.String("indexeddims", "app,client_ip,proxy_host", "Indexed Dimensions")
@@ -35,6 +37,14 @@ var (
 func main() {
 	iniflags.Parse()
 
+	if *pprofAddr != "" {
+		go func() {
+			log.Debugf("Starting pprof page at http://%s/debug/pprof", *pprofAddr)
+			if err := http.ListenAndServe(*pprofAddr, nil); err != nil {
+				log.Error(err)
+			}
+		}()
+	}
 	s, db, err := borda.TDBSave("tdbdata")
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
