@@ -29,39 +29,17 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	resp.Header().Set("Content-Type", "text/plain")
-	query := req.URL.Query()
-	sql := query.Get("sql")
+	sql := req.URL.RawQuery
 	if sql == "" {
-		badRequest(resp, "Please specify some sql")
+		badRequest(resp, "Please specify some sql in your query")
 		return
 	}
 
-	fromString := query.Get("from")
-	fromOffset, err := time.ParseDuration(fromString)
-	if err != nil {
-		badRequest(resp, "Error parsing from offset %v: %v", fromString, err)
-		return
-	}
-	now := time.Now()
-	from := now.Add(-1 * fromOffset)
-
-	to := now
-	toString := query.Get("to")
-	toOffset := 0 * time.Second
-	if toString != "" {
-		toOffset, err = time.ParseDuration(toString)
-		if err != nil {
-			badRequest(resp, "Error parsing to offset %v: %v", toString, err)
-			return
-		}
-		to = now.Add(-1 * toOffset)
-	}
 	aq, err := h.DB.SQLQuery(sql)
 	if err != nil {
 		badRequest(resp, err.Error())
 		return
 	}
-	aq.From(from).To(to)
 
 	result, err := aq.Run()
 	if err != nil {
