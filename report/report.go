@@ -103,7 +103,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	numPeriods := int(result.To.Sub(result.From) / result.Resolution)
-	for _, entry := range result.Entries {
+	for e, entry := range result.Entries {
 		for i := 0; i < numPeriods; i++ {
 			fmt.Fprintf(resp, "%-35v", result.To.Add(-1*time.Duration(i)*result.Resolution).Format(time.RFC1123))
 			for i, dim := range result.Dims {
@@ -112,9 +112,9 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 			for _, field := range result.FieldOrder {
 				fmt.Fprintf(resp, "%20.4f", entry.Fields[field][i].Get())
 			}
-			if i < numPeriods-1 {
-				fmt.Fprint(resp, "\n")
-			}
+		}
+		if e < len(result.Entries)-1 {
+			fmt.Fprint(resp, "\n")
 		}
 	}
 }
