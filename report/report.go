@@ -3,6 +3,7 @@ package report
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -29,7 +30,10 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	resp.Header().Set("Content-Type", "text/plain")
-	sql := req.URL.RawQuery
+	sql, err := url.QueryUnescape(req.URL.RawQuery)
+	if err != nil {
+		badRequest(resp, "Please url encode your sql query")
+	}
 	if sql == "" {
 		badRequest(resp, "Please specify some sql in your query")
 		return
