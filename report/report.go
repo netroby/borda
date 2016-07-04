@@ -52,24 +52,28 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(resp, "------------- %v ----------------\n", result.Table)
-	fmt.Fprintln(resp, sql)
-	fmt.Fprintln(resp)
-	fmt.Fprintf(resp, "# From:        %v\n", result.From)
-	fmt.Fprintf(resp, "# To:          %v\n", result.To)
-	fmt.Fprintf(resp, "# Resolution:  %v\n", result.Resolution)
-	fmt.Fprintf(resp, "# Dimensions:  %v\n\n", strings.Join(result.Dims, " "))
+	porcelain := strings.EqualFold("/porcelain", req.URL.Path)
 
-	fmt.Fprintf(resp, "# Query Runtime:  %v\n\n", result.Stats.Runtime)
+	if !porcelain {
+		fmt.Fprintf(resp, "------------- %v ----------------\n", result.Table)
+		fmt.Fprintln(resp, sql)
+		fmt.Fprintln(resp)
+		fmt.Fprintf(resp, "# From:        %v\n", result.From)
+		fmt.Fprintf(resp, "# To:          %v\n", result.To)
+		fmt.Fprintf(resp, "# Resolution:  %v\n", result.Resolution)
+		fmt.Fprintf(resp, "# Dimensions:  %v\n\n", strings.Join(result.Dims, " "))
 
-	fmt.Fprintln(resp, "# Key Statistics")
-	fmt.Fprintf(resp, "#   Scanned:       %v\n", humanize.Comma(result.Stats.Scanned))
-	fmt.Fprintf(resp, "#   Filter Pass:   %v\n", humanize.Comma(result.Stats.FilterPass))
-	fmt.Fprintf(resp, "#   Read Value:    %v\n", humanize.Comma(result.Stats.ReadValue))
-	fmt.Fprintf(resp, "#   Valid:         %v\n", humanize.Comma(result.Stats.DataValid))
-	fmt.Fprintf(resp, "#   In Time Range: %v\n\n", humanize.Comma(result.Stats.InTimeRange))
+		fmt.Fprintf(resp, "# Query Runtime:  %v\n\n", result.Stats.Runtime)
 
-	fmt.Fprintf(resp, "# %-33v", "time")
+		fmt.Fprintln(resp, "# Key Statistics")
+		fmt.Fprintf(resp, "#   Scanned:       %v\n", humanize.Comma(result.Stats.Scanned))
+		fmt.Fprintf(resp, "#   Filter Pass:   %v\n", humanize.Comma(result.Stats.FilterPass))
+		fmt.Fprintf(resp, "#   Read Value:    %v\n", humanize.Comma(result.Stats.ReadValue))
+		fmt.Fprintf(resp, "#   Valid:         %v\n", humanize.Comma(result.Stats.DataValid))
+		fmt.Fprintf(resp, "#   In Time Range: %v\n\n", humanize.Comma(result.Stats.InTimeRange))
+
+		fmt.Fprintf(resp, "# %-33v", "time")
+	}
 
 	// Calculate widths for dimensions
 	dimWidths := make(map[string]int, len(result.Dims))
@@ -87,14 +91,16 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		dimFormats = append(dimFormats, "%-"+fmt.Sprint(dimWidths[dim])+"v")
 	}
 
-	for i, dim := range result.Dims {
-		fmt.Fprintf(resp, dimFormats[i], dim)
-	}
+	if !porcelain {
+		for i, dim := range result.Dims {
+			fmt.Fprintf(resp, dimFormats[i], dim)
+		}
 
-	for _, field := range result.FieldOrder {
-		fmt.Fprintf(resp, "%20v", field)
+		for _, field := range result.FieldOrder {
+			fmt.Fprintf(resp, "%20v", field)
+		}
+		fmt.Fprint(resp, "\n")
 	}
-	fmt.Fprint(resp, "\n")
 
 	numPeriods := int(result.To.Sub(result.From) / result.Resolution)
 	for _, entry := range result.Entries {
