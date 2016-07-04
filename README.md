@@ -49,8 +49,8 @@ This query does the following:
 * Selects from the `proxies` table
 * Selects values in the time range starting one hour in the past and ending 30 minutes in the past
 * Groups results into 5 minute periods
-* Groups results by the proxy_host dimensions
-* For each period, calculates three different derived fields (error_count, success_count and error_rate) using the SUM aggregation operator
-* Limits results to those where the calculated error_rate is over 0.1
-* Orders the results by the SUM of the error_rate across all periods in descending order
+* Groups results by the `proxy_host` dimension
+* For each period, calculates three different derived fields (`error_count`, `success_count` and `error_rate`) using the `SUM` aggregation operator
+* Limits results to those where the calculated `error_rate` is over 0.1
+* Orders the results by the `SUM` of the `error_rate` across all periods for a given `proxy_host`, in descending order
 * Skips the first 25 resulting rows and returns 100 of the remaining ones
