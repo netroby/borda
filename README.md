@@ -38,6 +38,7 @@ SELECT
     SUM(success_count) / 0.01 AS success_count,
     SUM(error_count) / SUM(error_count + success_count) AS error_rate
 FROM proxies ASOF '-1h' UNTIL '-30m'
+WHERE proxy_host LIKE '188.'
 GROUP BY proxy_host, period(5m)
 HAVING SUM(error_rate) > 0.1
 ORDER BY SUM(error_rate) DESC
@@ -48,6 +49,7 @@ This query does the following:
 
 * Selects from the `proxies` table
 * Selects values in the time range starting one hour in the past and ending 30 minutes in the past
+* Only selects values whose `proxy_host` begins with `188.`
 * Groups results into 5 minute periods
 * Groups results by the `proxy_host` dimension
 * For each period, calculates three different derived fields (`error_count`, `success_count` and `error_rate`) using the `SUM` aggregation operator
