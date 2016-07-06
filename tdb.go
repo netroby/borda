@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/oxtoacart/tdb"
-	. "github.com/oxtoacart/tdb/expr"
+	"github.com/getlantern/tdb"
+	. "github.com/getlantern/tdb/expr"
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB

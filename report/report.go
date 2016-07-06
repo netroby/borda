@@ -9,7 +9,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/getlantern/golog"
-	"github.com/oxtoacart/tdb"
+	"github.com/getlantern/tdb"
 )
 
 var (
