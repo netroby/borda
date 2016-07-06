@@ -29,12 +29,6 @@ imports:
   version: abd866d3287cc5c24175a5773997138d15b61889
 - name: github.com/golang/glog
   version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
-- name: github.com/influxdata/influxdb
-  version: 383332daed5595926c235f250b11433f67229c35
-  subpackages:
-  - client/v2
-  - models
-  - pkg/escape
 - name: github.com/oxtoacart/bpool
   version: 4e1c5567d7c2dd59fa4c7c83d34c2f3528b025d6
 - name: github.com/stretchr/testify

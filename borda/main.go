@@ -6,7 +6,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
-	"time"
 
 	"github.com/getlantern/borda"
 	"github.com/getlantern/borda/report"
@@ -18,20 +17,11 @@ import (
 var (
 	log = golog.LoggerFor("borda")
 
-	httpsaddr     = flag.String("httpsaddr", ":62443", "The address at which to listen for HTTPS connections")
-	reportsaddr   = flag.String("reportsaddr", ":14443", "The address at which to listen for HTTPS connections to the reports")
-	pprofAddr     = flag.String("pprofaddr", "", "if specified, will listen for pprof connections at the specified tcp address")
-	pkfile        = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
-	certfile      = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
-	indexeddims   = flag.String("indexeddims", "app,client_ip,proxy_host", "Indexed Dimensions")
-	influxurl     = flag.String("influxurl", "http://localhost:8086", "InfluxDB URL")
-	influxdb      = flag.String("influxdb", "lantern2", "InfluxDB database name")
-	influxuser    = flag.String("influxuser", "lantern2", "InfluxDB username")
-	influxpass    = flag.String("influxpass", "", "InfluxDB password")
-	batchsize     = flag.Int("batchsize", 100, "Batch size")
-	batchwindow   = flag.Duration("batchwindow", 30*time.Second, "Batch window")
-	maxretries    = flag.Int("maxretries", 25, "Maximum retries to write to InfluxDB before giving up")
-	retryinterval = flag.Duration("retryinterval", 30*time.Second, "How long to wait between retries")
+	httpsaddr   = flag.String("httpsaddr", ":62443", "The address at which to listen for HTTPS connections")
+	reportsaddr = flag.String("reportsaddr", ":14443", "The address at which to listen for HTTPS connections to the reports")
+	pprofAddr   = flag.String("pprofaddr", "", "if specified, will listen for pprof connections at the specified tcp address")
+	pkfile      = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
+	certfile    = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
 )
 
 func main() {
