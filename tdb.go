@@ -47,7 +47,7 @@ func TDBSave(dir string) (SaveFunc, *tdb.DB, error) {
 		for range ticker.C {
 			for _, table := range []string{"combined", "proxies"} {
 				stats := db.TableStats(table)
-				log.Debugf("%v at %v -- Inserted Points: %v   Dropped Points: %v   Hot Keys: %v   Archived Buckets: %v   Expired Keys: %", table, db.Now(table).In(time.UTC), humanize.Comma(stats.InsertedPoints), humanize.Comma(stats.DroppedPoints), humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets), humanize.Comma(stats.ExpiredKeys))
+				log.Debugf("%v at %v -- Inserted Points: %v   Dropped Points: %v   Hot Keys: %v   Archived Buckets: %v   Expired Keys: %v", table, db.Now(table).In(time.UTC), humanize.Comma(stats.InsertedPoints), humanize.Comma(stats.DroppedPoints), humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets), humanize.Comma(stats.ExpiredKeys))
 			}
 		}
 	}()
