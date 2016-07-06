@@ -112,6 +112,9 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 			for _, field := range result.FieldOrder {
 				fmt.Fprintf(resp, "%20.4f", entry.Fields[field][i].Get())
 			}
+			if i < numPeriods-1 {
+				fmt.Fprint(resp, "\n")
+			}
 		}
 		if e < len(result.Entries)-1 {
 			fmt.Fprint(resp, "\n")
