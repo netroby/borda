@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/getlantern/eventual"
-	"github.com/influxdata/influxdb/client/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,11 +22,9 @@ var (
 			"field_float": 2.1,
 		},
 		Dimensions: map[string]interface{}{
-			"dim_string":   "a",
-			"dim_int":      1,
-			"field_int":    2,
-			"field_bool":   true,
-			"field_string": "stringy",
+			"dim_string": "a",
+			"dim_int":    1,
+			"dim_bool":   true,
 		},
 	}
 	missingName = &Measurement{
@@ -61,16 +58,12 @@ func TestHTTPRoundTrip(t *testing.T) {
 	httpAddr := hl.Addr().String()
 
 	done := eventual.NewValue()
-	write := func(batch client.BatchPoints) error {
-		validateBatch(t, true, batch)
+	s := func(m *Measurement) error {
+		validateMeasurement(t, m)
 		done.Set(true)
 		return nil
 	}
-
-	s := func(m *Measurement) {
-		done.Set(true)
-	}
-	h := &Handler{s}
+	h := &Handler{Save: s}
 	go http.Serve(hl, h)
 
 	resp, _ := httpRequest(httpAddr, badContentType, []*Measurement{good})
@@ -124,31 +117,18 @@ func httpRequest(addr string, contentType string, measurements []*Measurement) (
 	return client.Do(req)
 }
 
-func validateMeasurement(t *testing.T, allFloats bool, m *Measurement) {
+func validateMeasurement(t *testing.T, m *Measurement) {
 	assert.Equal(t, "combined", m.Name, "Incorrect measurement key")
-	assert.NotNil(t, point.Time(), "Missing timestamp")
+	assert.NotNil(t, m.Ts, "Missing timestamp")
 	assert.Equal(t, map[string]interface{}{
 		// Original dimensions, all are strings
 		"dim_string": "a",
-		"dim_int":    "1",
-	}, point.Tags(), "Incorrect tags")
+		"dim_int":    float64(1),
+		"dim_bool":   true,
+	}, m.Dimensions, "Incorrect tags")
 
-	var dimI interface{} = int64(1)
-	var i interface{} = int64(2)
-	if allFloats {
-		dimI = float64(1)
-		i = float64(2)
-	}
-
-	assert.Equal(t, map[string]interface{}{
+	assert.Equal(t, map[string]float64{
 		// Original fields
-		"field_int":    i,
-		"field_float":  float64(2.1),
-		"field_bool":   true,
-		"field_string": "stringy",
-
-		// Synthetic fields for dimensions
-		"_dim_string": "a",
-		"_dim_int":    dimI,
-	}, point.Fields(), "Incorrect fields")
+		"field_float": float64(2.1),
+	}, m.Values, "Incorrect fields")
 }
