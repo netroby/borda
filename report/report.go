@@ -58,10 +58,10 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(resp, "------------- %v ----------------\n", result.Table)
 		fmt.Fprintln(resp, sql)
 		fmt.Fprintln(resp)
-		fmt.Fprintf(resp, "# From:        %v\n", result.From)
-		fmt.Fprintf(resp, "# To:          %v\n", result.To)
-		fmt.Fprintf(resp, "# Resolution:  %v\n", result.Resolution)
-		fmt.Fprintf(resp, "# Dimensions:  %v\n\n", strings.Join(result.Dims, " "))
+		fmt.Fprintf(resp, "# As Of:      %v\n", result.AsOf)
+		fmt.Fprintf(resp, "# Until:      %v\n", result.Until)
+		fmt.Fprintf(resp, "# Resolution: %v\n", result.Resolution)
+		fmt.Fprintf(resp, "# Group By:   %v\n\n", strings.Join(result.GroupBy, " "))
 
 		fmt.Fprintf(resp, "# Query Runtime:  %v\n\n", result.Stats.Runtime)
 
@@ -76,7 +76,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	// Calculate widths for dimensions
-	dimWidths := make(map[string]int, len(result.Dims))
+	dimWidths := make(map[string]int, len(result.GroupBy))
 	for _, entry := range result.Entries {
 		for dim, val := range entry.Dims {
 			width := len(fmt.Sprint(val))
@@ -87,30 +87,30 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	dimFormats := make([]string, 0, len(dimWidths))
-	for _, dim := range result.Dims {
+	for _, dim := range result.GroupBy {
 		dimFormats = append(dimFormats, "%-"+fmt.Sprint(dimWidths[dim])+"v")
 	}
 
 	if !porcelain {
-		for i, dim := range result.Dims {
+		for i, dim := range result.GroupBy {
 			fmt.Fprintf(resp, dimFormats[i], dim)
 		}
 
-		for _, field := range result.FieldOrder {
-			fmt.Fprintf(resp, "%20v", field)
+		for _, field := range result.Fields {
+			fmt.Fprintf(resp, "%20v", field.Name)
 		}
 		fmt.Fprint(resp, "\n")
 	}
 
-	numPeriods := int(result.To.Sub(result.From) / result.Resolution)
+	numPeriods := int(result.Until.Sub(result.AsOf) / result.Resolution)
 	for e, entry := range result.Entries {
 		for i := 0; i < numPeriods; i++ {
-			fmt.Fprintf(resp, "%-35v", result.To.Add(-1*time.Duration(i)*result.Resolution).Format(time.RFC1123))
-			for i, dim := range result.Dims {
+			fmt.Fprintf(resp, "%-35v", result.Until.Add(-1*time.Duration(i)*result.Resolution).Format(time.RFC1123))
+			for i, dim := range result.GroupBy {
 				fmt.Fprintf(resp, dimFormats[i], entry.Dims[dim])
 			}
-			for _, field := range result.FieldOrder {
-				fmt.Fprintf(resp, "%20.4f", entry.Fields[field][i].Get())
+			for _, field := range result.Fields {
+				fmt.Fprintf(resp, "%20.4f", entry.Fields[field.Name][i].Get())
 			}
 			if i < numPeriods-1 {
 				fmt.Fprint(resp, "\n")
