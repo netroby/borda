@@ -22,7 +22,7 @@ func TDBSave(dir string, schemaFile string) (SaveFunc, *tdb.DB, error) {
 		ticker := time.NewTicker(5 * time.Second)
 		for range ticker.C {
 			for name, stats := range db.AllTableStats() {
-				log.Debugf("%v at %v -- Inserted Points: %v   Dropped Points: %v   Hot Keys: %v   Archived Buckets: %v   Expired Keys: %v", name, db.Now(name).In(time.UTC), humanize.Comma(stats.InsertedPoints), humanize.Comma(stats.DroppedPoints), humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets), humanize.Comma(stats.ExpiredKeys))
+				log.Debugf("%v at %v -- Filtered Points: %v    Inserted Points: %v   Dropped Points: %v   Hot Keys: %v   Archived Buckets: %v   Expired Keys: %v", name, db.Now(name).In(time.UTC), humanize.Comma(stats.FilteredPoints), humanize.Comma(stats.InsertedPoints), humanize.Comma(stats.DroppedPoints), humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets), humanize.Comma(stats.ExpiredKeys))
 			}
 		}
 	}()
