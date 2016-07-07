@@ -35,7 +35,7 @@ func main() {
 			}
 		}()
 	}
-	s, db, err := borda.TDBSave("tdbdata")
+	s, db, err := borda.TDBSave("tdbdata", "schema.yaml")
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}

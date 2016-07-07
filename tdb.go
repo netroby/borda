@@ -5,39 +5,15 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/getlantern/tdb"
-	. "github.com/getlantern/tdb/expr"
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
-func TDBSave(dir string) (SaveFunc, *tdb.DB, error) {
-	resolution := 5 * time.Minute
-	hotPeriod := 10 * time.Minute
-	retentionPeriod := 1 * time.Hour
-
-	db := tdb.NewDB(&tdb.DBOpts{
-		Dir:       dir,
-		BatchSize: 1000,
+func TDBSave(dir string, schemaFile string) (SaveFunc, *tdb.DB, error) {
+	db, err := tdb.NewDB(&tdb.DBOpts{
+		Dir:        dir,
+		SchemaFile: schemaFile,
+		BatchSize:  1000,
 	})
-	err := db.CreateTable("combined", resolution, hotPeriod, retentionPeriod, map[string]Expr{
-		"success_count": SUM("success_count"),
-		"error_count":   SUM("error_count"),
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-	err = db.CreateView("combined", "proxies", resolution, hotPeriod, 7*24*time.Hour, "proxy_host")
-	if err != nil {
-		return nil, nil, err
-	}
-	err = db.CreateView("combined", "proxies_archive", 1*time.Hour, 2*time.Hour, 31*24*time.Hour, "proxy_host")
-	if err != nil {
-		return nil, nil, err
-	}
-	err = db.CreateView("combined", "clients", resolution, hotPeriod, 7*24*time.Hour, "client_ip")
-	if err != nil {
-		return nil, nil, err
-	}
-	err = db.CreateView("combined", "clients_archive", 1*time.Hour, 2*time.Hour, 31*24*time.Hour, "client_ip")
 	if err != nil {
 		return nil, nil, err
 	}
@@ -45,15 +21,14 @@ func TDBSave(dir string) (SaveFunc, *tdb.DB, error) {
 	go func() {
 		ticker := time.NewTicker(5 * time.Second)
 		for range ticker.C {
-			for _, table := range []string{"combined", "proxies"} {
-				stats := db.TableStats(table)
-				log.Debugf("%v at %v -- Inserted Points: %v   Dropped Points: %v   Hot Keys: %v   Archived Buckets: %v   Expired Keys: %v", table, db.Now(table).In(time.UTC), humanize.Comma(stats.InsertedPoints), humanize.Comma(stats.DroppedPoints), humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets), humanize.Comma(stats.ExpiredKeys))
+			for name, stats := range db.AllTableStats() {
+				log.Debugf("%v at %v -- Inserted Points: %v   Dropped Points: %v   Hot Keys: %v   Archived Buckets: %v   Expired Keys: %v", name, db.Now(name).In(time.UTC), humanize.Comma(stats.InsertedPoints), humanize.Comma(stats.DroppedPoints), humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets), humanize.Comma(stats.ExpiredKeys))
 			}
 		}
 	}()
 
 	return func(m *Measurement) error {
-		return db.Insert("combined", &tdb.Point{
+		return db.Insert("inbound", &tdb.Point{
 			Ts:   m.Ts,
 			Dims: m.Dimensions,
 			Vals: m.Values,
