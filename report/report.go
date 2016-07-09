@@ -81,14 +81,14 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		for dim, val := range entry.Dims {
 			width := len(fmt.Sprint(val))
 			if width > dimWidths[dim] {
-				dimWidths[dim] = width + 4 // padding
+				dimWidths[dim] = width
 			}
 		}
 	}
 
 	dimFormats := make([]string, 0, len(dimWidths))
 	for _, dim := range result.GroupBy {
-		dimFormats = append(dimFormats, "%-"+fmt.Sprint(dimWidths[dim])+"v")
+		dimFormats = append(dimFormats, "%-"+fmt.Sprint(dimWidths[dim]+4)+"v")
 	}
 
 	if !porcelain {
