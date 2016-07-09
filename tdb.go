@@ -29,7 +29,7 @@ func TDBSave(dir string, schemaFile string) (SaveFunc, *tdb.DB, error) {
 
 	return func(m *Measurement) error {
 		return db.Insert("inbound", &tdb.Point{
-			Ts:   m.Ts,
+			Ts:   time.Now(), // use now so that clients with bad clocks don't throw things off m.Ts,
 			Dims: m.Dimensions,
 			Vals: m.Values,
 		})
