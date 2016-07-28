@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/golang/glog"
+	"sync/atomic"
+	"time"
 )
 
 const (
@@ -16,8 +16,15 @@ const (
 	ContentTypeJSON = "application/json"
 )
 
+// Handler is an http.Handler that reads Measurements from HTTP and saves them
+// to the database.
+type Handler struct {
+	Save                 SaveFunc
+	receivedMeasurements int64
+}
+
 // ServeHTTP implements the http.Handler interface and supports publishing measurements via HTTP.
-func (c *collector) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		resp.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprintf(resp, "Method %v not allowed\n", req.Method)
@@ -61,12 +68,28 @@ func (c *collector) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	glog.Infof("Received %d measurements", len(measurements))
+	atomic.AddInt64(&h.receivedMeasurements, int64(len(measurements)))
+	log.Tracef("Received %d measurements", len(measurements))
 	for _, m := range measurements {
-		c.Submit(m)
+		err := h.Save(m)
+		if err != nil {
+			log.Errorf("Error saving measurement, continuing: %v", err)
+		}
 	}
 
 	resp.WriteHeader(http.StatusCreated)
+}
+
+func (h *Handler) Report() {
+	start := time.Now()
+	ticker := time.NewTicker(15 * time.Second)
+	for range ticker.C {
+		delta := time.Now().Sub(start)
+		measurements := float64(atomic.SwapInt64(&h.receivedMeasurements, 0))
+		tps := measurements / delta.Seconds()
+		log.Debugf("Processed %d measurements per second", int(tps))
+		start = time.Now()
+	}
 }
 
 func badRequest(resp http.ResponseWriter, msg string, args ...interface{}) {

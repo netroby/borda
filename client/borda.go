@@ -22,25 +22,20 @@ var (
 	bufferPool = bpool.NewBufferPool(100)
 )
 
-// Measurement represents a measurement at a point in time. It maps to a "point"
-// in InfluxDB.
+// Measurement represents a measurement at a point in time.
 type Measurement struct {
-	// Name is the name of the measurement (e.g. cpu_usage). It maps to the "key"
-	// in "InfluxDB".
+	// Name is the name of the measurement (e.g. cpu_usage).
 	Name string `json:"name"`
 
 	// Ts records the time of the measurement.
 	Ts time.Time `json:"ts,omitempty"`
 
-	// Values contains numeric values of the measurement. These will be stored as
-	// "fields" in InfluxDB.
+	// Values contains numeric values of the measurement.
 	//
 	// Example: { "num_errors": 67 }
 	Values map[string]float64 `json:"values,omitempty"`
 
 	// Dimensions captures key/value pairs which characterize the measurement.
-	// Dimensions are stored as "tags" or "fields" in InfluxDB depending on which
-	// dimensions have been configured as "IndexedDimensions" on the Collector.
 	//
 	// Example: { "requestid": "18af517b-004f-486c-9978-6cf60be7f1e9",
 	//            "ipv6": "2001:0db8:0a0b:12f0:0000:0000:0000:0001",

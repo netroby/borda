@@ -5,9 +5,5 @@ import:
 - package: github.com/stretchr/testify
   subpackages:
   - assert
-- package: github.com/influxdata/influxdb
-  version: "0.12"
-  subpackages:
-  - client/v2
 - package: github.com/vharitonsky/iniflags
 - package: github.com/getlantern/errors
