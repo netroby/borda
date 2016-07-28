@@ -3,7 +3,6 @@ package borda
 import (
 	"time"
 
-	"github.com/dustin/go-humanize"
 	"github.com/getlantern/tdb"
 )
 
@@ -12,7 +11,6 @@ func TDBSave(dir string, schemaFile string) (SaveFunc, *tdb.DB, error) {
 	db, err := tdb.NewDB(&tdb.DBOpts{
 		Dir:        dir,
 		SchemaFile: schemaFile,
-		BatchSize:  1000,
 	})
 	if err != nil {
 		return nil, nil, err
@@ -21,8 +19,8 @@ func TDBSave(dir string, schemaFile string) (SaveFunc, *tdb.DB, error) {
 	go func() {
 		ticker := time.NewTicker(5 * time.Second)
 		for range ticker.C {
-			for name, stats := range db.AllTableStats() {
-				log.Debugf("%v at %v -- Filtered Points: %v    Inserted Points: %v   Dropped Points: %v   Hot Keys: %v   Archived Buckets: %v   Expired Keys: %v", name, db.Now(name).In(time.UTC), humanize.Comma(stats.FilteredPoints), humanize.Comma(stats.InsertedPoints), humanize.Comma(stats.DroppedPoints), humanize.Comma(stats.HotKeys), humanize.Comma(stats.ArchivedBuckets), humanize.Comma(stats.ExpiredKeys))
+			for name := range db.AllTableStats() {
+				db.PrintTableStats(name)
 			}
 		}
 	}()

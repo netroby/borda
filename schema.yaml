@@ -1,0 +1,78 @@
+combined:
+  retentionperiod: 1h
+  maxmemstorebytes: 1048576
+  maxflushlatency:  5m
+  sql: >
+    SELECT
+     	SUM(success_count) AS success_count,
+    	SUM(error_count) AS error_count
+    FROM inbound
+    GROUP BY *, period(5m)
+
+proxies:
+  retentionperiod: 168h
+  maxmemstorebytes: 1048576
+  maxflushlatency:  5m
+  sql: >
+    SELECT
+     	SUM(success_count) AS success_count,
+    	SUM(error_count) AS error_count
+    FROM inbound
+    GROUP BY proxy_host, period(5m)
+
+proxies_archive:
+  retentionperiod: 8760h
+  maxmemstorebytes: 1048576
+  maxflushlatency:  5m
+  sql: >
+    SELECT
+     	SUM(success_count) AS success_count,
+    	SUM(error_count) AS error_count
+    FROM inbound
+    GROUP BY proxy_host, period(1h)
+
+clients:
+  retentionperiod: 168h
+  maxmemstorebytes: 1048576
+  maxflushlatency:  5m
+  sql: >
+    SELECT
+     	SUM(success_count) AS success_count,
+    	SUM(error_count) AS error_count
+    FROM inbound
+    GROUP BY client_ip, period(5m)
+
+clients_archive:
+  retentionperiod: 8760h
+  maxmemstorebytes: 1048576
+  maxflushlatency:  5m
+  sql: >
+    SELECT
+     	SUM(success_count) AS success_count,
+    	SUM(error_count) AS error_count
+    FROM inbound
+    GROUP BY client_ip, period(1h)
+
+filtered:
+  retentionperiod: 1h
+  maxmemstorebytes: 1048576
+  maxflushlatency:  5m
+  sql: >
+    SELECT
+     	SUM(success_count) AS success_count,
+    	SUM(error_count) AS error_count
+    FROM inbound
+    WHERE error NOT LIKE 'no such host' AND error NOT LIKE 'connection refused'
+    GROUP BY *, period(5m)
+
+filtered_proxies:
+  retentionperiod: 168h
+  maxmemstorebytes: 1048576
+  maxflushlatency:  5m
+  sql: >
+    SELECT
+     	SUM(success_count) AS success_count,
+    	SUM(error_count) AS error_count
+    FROM inbound
+    WHERE error NOT LIKE 'no such host' AND error NOT LIKE 'connection refused'
+    GROUP BY proxy_host, period(5m)

@@ -109,8 +109,9 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 			for i, dim := range result.GroupBy {
 				fmt.Fprintf(resp, dimFormats[i], entry.Dims[dim])
 			}
-			for _, field := range result.Fields {
-				fmt.Fprintf(resp, "%20.4f", entry.Fields[field.Name][i].Get())
+			for x, field := range result.Fields {
+				val, _ := entry.Fields[x].ValueAt(i, field)
+				fmt.Fprintf(resp, "%20.4f", val)
 			}
 			if i < numPeriods-1 {
 				fmt.Fprint(resp, "\n")
