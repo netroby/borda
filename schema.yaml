@@ -1,6 +1,7 @@
 combined:
   retentionperiod: 1h
-  maxmemstorebytes: 1048576
+  maxmemstorebytes: 25000000
+  minflushlatency:  1m
   maxflushlatency:  5m
   sql: >
     SELECT
@@ -11,7 +12,8 @@ combined:
 
 proxies:
   retentionperiod: 168h
-  maxmemstorebytes: 1048576
+  maxmemstorebytes: 25000000
+  minflushlatency:  1m
   maxflushlatency:  5m
   sql: >
     SELECT
@@ -22,7 +24,8 @@ proxies:
 
 proxies_archive:
   retentionperiod: 8760h
-  maxmemstorebytes: 1048576
+  maxmemstorebytes: 25000000
+  minflushlatency:  1m
   maxflushlatency:  5m
   sql: >
     SELECT
@@ -33,7 +36,8 @@ proxies_archive:
 
 clients:
   retentionperiod: 168h
-  maxmemstorebytes: 1048576
+  maxmemstorebytes: 25000000
+  minflushlatency:  1m
   maxflushlatency:  5m
   sql: >
     SELECT
@@ -44,7 +48,8 @@ clients:
 
 clients_archive:
   retentionperiod: 8760h
-  maxmemstorebytes: 1048576
+  maxmemstorebytes: 25000000
+  minflushlatency:  1m
   maxflushlatency:  5m
   sql: >
     SELECT
@@ -55,7 +60,8 @@ clients_archive:
 
 filtered:
   retentionperiod: 1h
-  maxmemstorebytes: 1048576
+  maxmemstorebytes: 25000000
+  minflushlatency:  1m
   maxflushlatency:  5m
   sql: >
     SELECT
@@ -67,7 +73,8 @@ filtered:
 
 filtered_proxies:
   retentionperiod: 168h
-  maxmemstorebytes: 1048576
+  maxmemstorebytes: 25000000
+  minflushlatency:  1m
   maxflushlatency:  5m
   sql: >
     SELECT
