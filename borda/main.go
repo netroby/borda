@@ -19,7 +19,7 @@ var (
 
 	httpsaddr   = flag.String("httpsaddr", ":62443", "The address at which to listen for HTTPS connections")
 	reportsaddr = flag.String("reportsaddr", ":14443", "The address at which to listen for HTTPS connections to the reports")
-	pprofAddr   = flag.String("pprofaddr", "", "if specified, will listen for pprof connections at the specified tcp address")
+	pprofAddr   = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
 	pkfile      = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
 	certfile    = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
 )
