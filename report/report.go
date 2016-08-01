@@ -9,7 +9,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/getlantern/golog"
-	"github.com/getlantern/tdb"
+	"github.com/getlantern/tibsdb"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 )
 
 type Handler struct {
-	DB *tdb.DB
+	DB *tibsdb.DB
 }
 
 // ServeHTTP implements the http.Handler interface and supports querying via
