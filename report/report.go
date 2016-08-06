@@ -71,55 +71,75 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(resp, "#   Read Value:    %v\n", humanize.Comma(result.Stats.ReadValue))
 		fmt.Fprintf(resp, "#   Valid:         %v\n", humanize.Comma(result.Stats.DataValid))
 		fmt.Fprintf(resp, "#   In Time Range: %v\n\n", humanize.Comma(result.Stats.InTimeRange))
-
-		fmt.Fprintf(resp, "# %-33v", "time")
 	}
 
-	// Calculate widths for dimensions
-	dimWidths := make(map[string]int, len(result.GroupBy))
-	for _, entry := range result.Entries {
-		for dim, val := range entry.Dims {
+	// Calculate widths for dimensions and fields
+	dimWidths := make([]int, len(result.GroupBy))
+	fieldWidths := make([]int, len(result.FieldNames))
+
+	for i, dim := range result.GroupBy {
+		width := len(dim)
+		if width > dimWidths[i] {
+			dimWidths[i] = width
+		}
+	}
+
+	for i, field := range result.FieldNames {
+		width := len(field)
+		if width > fieldWidths[i] {
+			fieldWidths[i] = width
+		}
+	}
+
+	for _, row := range result.Rows {
+		for i, val := range row.Dims {
 			width := len(fmt.Sprint(val))
-			if width > dimWidths[dim] {
-				dimWidths[dim] = width
+			if width > dimWidths[i] {
+				dimWidths[i] = width
+			}
+		}
+
+		for i, val := range row.Values {
+			width := len(fmt.Sprint(val))
+			if width > fieldWidths[i] {
+				fieldWidths[i] = width
 			}
 		}
 	}
 
+	// Create formats for dims and fields
 	dimFormats := make([]string, 0, len(dimWidths))
-	for _, dim := range result.GroupBy {
-		dimFormats = append(dimFormats, "%-"+fmt.Sprint(dimWidths[dim]+4)+"v")
+	fieldLabelFormats := make([]string, 0, len(fieldWidths))
+	fieldFormats := make([]string, 0, len(fieldWidths))
+	for _, width := range dimWidths {
+		dimFormats = append(dimFormats, "%-"+fmt.Sprint(width+4)+"v")
+	}
+	for _, width := range fieldWidths {
+		fieldLabelFormats = append(fieldLabelFormats, "%"+fmt.Sprint(width+4)+"v")
+		fieldFormats = append(fieldFormats, "%"+fmt.Sprint(width+4)+".4f")
 	}
 
 	if !porcelain {
+		// Print header row
+		fmt.Fprintf(resp, "# %-33v", "time")
 		for i, dim := range result.GroupBy {
 			fmt.Fprintf(resp, dimFormats[i], dim)
 		}
-
-		for _, field := range result.Fields {
-			fmt.Fprintf(resp, "%20v", field.Name)
+		for i, field := range result.FieldNames {
+			fmt.Fprintf(resp, fieldLabelFormats[i], field)
 		}
 		fmt.Fprint(resp, "\n")
 	}
 
-	numPeriods := int(result.Until.Sub(result.AsOf) / result.Resolution)
-	for e, entry := range result.Entries {
-		for i := 0; i < numPeriods; i++ {
-			fmt.Fprintf(resp, "%-35v", result.Until.Add(-1*time.Duration(i)*result.Resolution).Format(time.RFC1123))
-			for i, dim := range result.GroupBy {
-				fmt.Fprintf(resp, dimFormats[i], entry.Dims[dim])
-			}
-			for x, field := range result.Fields {
-				val, _ := entry.Fields[x].ValueAt(i, field)
-				fmt.Fprintf(resp, "%20.4f", val)
-			}
-			if i < numPeriods-1 {
-				fmt.Fprint(resp, "\n")
-			}
+	for _, row := range result.Rows {
+		fmt.Fprintf(resp, "%-35v", result.Until.Add(-1*time.Duration(row.Period)*result.Resolution).Format(time.RFC1123))
+		for i, dim := range row.Dims {
+			fmt.Fprintf(resp, dimFormats[i], dim)
 		}
-		if e < len(result.Entries)-1 {
-			fmt.Fprint(resp, "\n")
+		for i, val := range row.Values {
+			fmt.Fprintf(resp, fieldFormats[i], val)
 		}
+		fmt.Fprint(resp, "\n")
 	}
 }
 
