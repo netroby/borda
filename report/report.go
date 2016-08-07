@@ -9,7 +9,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/getlantern/golog"
-	"github.com/getlantern/tibsdb"
+	"github.com/getlantern/zenodb"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 )
 
 type Handler struct {
-	DB *tibsdb.DB
+	DB *zenodb.DB
 }
 
 // ServeHTTP implements the http.Handler interface and supports querying via
@@ -71,6 +71,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(resp, "#   Read Value:    %v\n", humanize.Comma(result.Stats.ReadValue))
 		fmt.Fprintf(resp, "#   Valid:         %v\n", humanize.Comma(result.Stats.DataValid))
 		fmt.Fprintf(resp, "#   In Time Range: %v\n\n", humanize.Comma(result.Stats.InTimeRange))
+
 	}
 
 	// Calculate widths for dimensions and fields

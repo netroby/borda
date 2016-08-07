@@ -3,12 +3,12 @@ package borda
 import (
 	"time"
 
-	"github.com/getlantern/tibsdb"
+	"github.com/getlantern/zenodb"
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
-func TDBSave(dir string, schemaFile string) (SaveFunc, *tibsdb.DB, error) {
-	db, err := tibsdb.NewDB(&tibsdb.DBOpts{
+func TDBSave(dir string, schemaFile string) (SaveFunc, *zenodb.DB, error) {
+	db, err := zenodb.NewDB(&zenodb.DBOpts{
 		Dir:        dir,
 		SchemaFile: schemaFile,
 	})
@@ -26,7 +26,7 @@ func TDBSave(dir string, schemaFile string) (SaveFunc, *tibsdb.DB, error) {
 	}()
 
 	return func(m *Measurement) error {
-		return db.Insert("inbound", &tibsdb.Point{
+		return db.Insert("inbound", &zenodb.Point{
 			Ts:   time.Now(), // use now so that clients with bad clocks don't throw things off m.Ts,
 			Dims: m.Dimensions,
 			Vals: m.Values,

@@ -11,15 +11,15 @@ import (
 	"github.com/getlantern/borda"
 	"github.com/getlantern/borda/report"
 	"github.com/getlantern/golog"
-	"github.com/getlantern/tibsdb/rpc"
 	"github.com/getlantern/tlsdefaults"
+	"github.com/getlantern/zenodb/rpc"
 	"github.com/vharitonsky/iniflags"
 )
 
 var (
 	log = golog.LoggerFor("borda")
 
-	httpsaddr   = flag.String("httpsaddr", ":62443", "The address at which to listen for HTTPS connections")
+	httpsaddr   = flag.String("httpsaddr", ":443", "The address at which to listen for HTTPS connections")
 	reportsaddr = flag.String("reportsaddr", "localhost:14443", "The address at which to listen for HTTPS connections to the reports")
 	cliaddr     = flag.String("cliaddr", "localhost:17712", "The address at which to listen for gRPC cli connections, defaults to localhost:17712")
 	pprofAddr   = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
@@ -38,7 +38,7 @@ func main() {
 			}
 		}()
 	}
-	s, db, err := borda.TDBSave("tdbdata", "schema.yaml")
+	s, db, err := borda.TDBSave("zenodata", "schema.yaml")
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
