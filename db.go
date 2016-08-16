@@ -7,10 +7,11 @@ import (
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
-func TDBSave(dir string, schemaFile string) (SaveFunc, *zenodb.DB, error) {
+func TDBSave(dir string, schemaFile string, ispdb string) (SaveFunc, *zenodb.DB, error) {
 	db, err := zenodb.NewDB(&zenodb.DBOpts{
-		Dir:        dir,
-		SchemaFile: schemaFile,
+		Dir:         dir,
+		SchemaFile:  schemaFile,
+		ISPDatabase: ispdb,
 	})
 	if err != nil {
 		return nil, nil, err

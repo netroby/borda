@@ -25,6 +25,7 @@ var (
 	pprofAddr   = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
 	pkfile      = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
 	certfile    = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
+	ispdb       = flag.String("ispdb", "", "In order to enable ISP functions, point this to an IP2Location Lite ISP database file like the one here - https://lite.ip2location.com/database/ip-asn")
 )
 
 func main() {
@@ -38,7 +39,7 @@ func main() {
 			}
 		}()
 	}
-	s, db, err := borda.TDBSave("zenodata", "schema.yaml")
+	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *ispdb)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
