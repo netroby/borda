@@ -57,11 +57,6 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		if m.Ts.IsZero() {
-			badRequest(resp, "Missing ts")
-			return
-		}
-
 		if m.Values == nil || len(m.Values) == 0 {
 			badRequest(resp, "Need at least one value")
 			return
