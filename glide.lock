@@ -1,5 +1,5 @@
 hash: 4e5ad2693621b766c7c3760b4e48a6c46c8ab09b461969e9f990694c861dd4cf
-updated: 2016-09-04T20:00:37.483711466-05:00
+updated: 2016-09-04T20:24:19.712569056-05:00
 imports:
 - name: github.com/davecgh/go-spew
   version: 6cf5744a041a0022271cefed95ba843f6d87fd51
@@ -47,7 +47,7 @@ imports:
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: e2d6abebcc0751e5063746d2042cdd4a99c6c045
+  version: d6deb8ab920f7a1fed8cdaf24d2b6ca13d676636
   subpackages:
   - rpc
   - bytetree
