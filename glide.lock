@@ -1,82 +1,84 @@
 hash: 4e5ad2693621b766c7c3760b4e48a6c46c8ab09b461969e9f990694c861dd4cf
-updated: 2016-07-28T16:09:07.02407533-05:00
+updated: 2016-09-04T20:00:37.483711466-05:00
 imports:
-- name: github.com/cockroachdb/c-jemalloc
-  version: 9716a86928311cee3633f1773035ce9f0cf9f9e9
-- name: github.com/cockroachdb/c-lz4
-  version: 834d3303c9e84b1045bc57c3eb3723ee8cb4d33b
-- name: github.com/cockroachdb/c-rocksdb
-  version: ab57b321a358f4c93fb639331ac3e10911649492
-- name: github.com/cockroachdb/c-snappy
-  version: d4e7b428fe7fc09e93573df3448567a62df8c9fa
 - name: github.com/davecgh/go-spew
-  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  version: 6cf5744a041a0022271cefed95ba843f6d87fd51
   subpackages:
   - spew
 - name: github.com/dustin/go-humanize
   version: 2fcb5204cdc65b4bec9fd0a87606bb0d0e3c54e8
 - name: github.com/getlantern/byteexec
-  version: 431d6edd2151495029d77e1c510affa5d89fe168
+  version: 2e21fedeb225921a8dc40321cbd114ffd0a302f3
 - name: github.com/getlantern/bytemap
-  version: 863b456d121980128df27b85b22b58857d53ee16
+  version: 665decc0805d17a2e11d86ca730a8a0253915d07
 - name: github.com/getlantern/context
   version: 624d99b1798d7c5375ea1d3ca4c5b04d58f7c775
 - name: github.com/getlantern/errors
-  version: 2cb9490e9d7173de46312139267791c8115f5e10
+  version: 99fa440517e8f3d1e4cd8d6dbed6b41f4c1ed3d6
 - name: github.com/getlantern/eventual
-  version: a1db8f0cde49e1f2a0cbf34879011e5eceeaac67
+  version: 8a3a062ff1605f65e4d710e016c39bb69e91b6f8
 - name: github.com/getlantern/filepersist
   version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
+- name: github.com/getlantern/goexpr
+  version: f0daec94230906f84d7002e33b8872c022844cbe
+  subpackages:
+  - geo
+  - isp
 - name: github.com/getlantern/golog
-  version: 00277a46b6a621ee8868060f5bd4b0173d452c7b
+  version: e69a4a00c012e476efd814128cdcd4e04e641dc7
 - name: github.com/getlantern/hex
   version: 083fba3033ad473db3dd31c9bb368473d37581a7
 - name: github.com/getlantern/hidden
   version: d52a649ab33af200943bb599898dbdcfdbc94cb7
 - name: github.com/getlantern/keyman
-  version: 068a9b24f9af425a6f662a8fe5dcc032e4001897
+  version: 27a13a8da00afce6b6b7e4b4b486a440b4629718
   subpackages:
   - certimporter
 - name: github.com/getlantern/ops
   version: b70875f5d689a9438bca72aefd7142a2af889b18
+- name: github.com/getlantern/sqlparser
+  version: 973c96a6571cfc7e41c676b126ad8990634d1b6d
 - name: github.com/getlantern/stack
   version: 02f928aad224fbccd50d66edd776fc9d1e9f2f2b
-- name: github.com/getlantern/tdb
-  version: d45a99e271f8e1c2f826fb14d0ed66b03bfa6810
-  subpackages:
-  - expr
-  - sql
 - name: github.com/getlantern/tlsdefaults
-  version: abd866d3287cc5c24175a5773997138d15b61889
+  version: e9da92daa10f62c8a1aa59188e64317cb3beebb0
 - name: github.com/getlantern/vtime
-  version: e2d275c94c8d25a2e4117d881dbab3f96ee93604
+  version: dc1e573cf9918131774034baa8eade77ef901ea3
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
-- name: github.com/Knetic/govaluate
-  version: 911d920323b6b25389d34eef0b04cfbdf90a0fbf
+- name: github.com/getlantern/zenodb
+  version: e2d6abebcc0751e5063746d2042cdd4a99c6c045
+  subpackages:
+  - rpc
+  - bytetree
+  - encoding
+  - expr
+  - sql
+- name: github.com/golang/protobuf
+  version: 1f49d83d9aa00e6ce4fc8258c71cc7786aec968a
+  subpackages:
+  - proto
+- name: github.com/golang/snappy
+  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+- name: github.com/oschwald/geoip2-golang
+  version: ccee6e9d9b1ee5cee16ac664bc1982952edfb13d
+- name: github.com/oschwald/maxminddb-golang
+  version: f4aa55714a3f843869ca9a38625e177a627c1ce6
 - name: github.com/oxtoacart/bpool
   version: 4e1c5567d7c2dd59fa4c7c83d34c2f3528b025d6
-- name: github.com/oxtoacart/sqlparser
-  version: 4199a3f1dc365d5ce25b0884b4e33666b89ba169
-- name: github.com/robertkrimen/otto
-  version: c41cf547e08c4a88c36859766ece30dd178d7bc1
-  subpackages:
-  - ast
-  - dbg
-  - file
-  - parser
-  - registry
-  - token
-- name: github.com/spaolacci/murmur3
-  version: 0d12bf811670bf6a1a63828dfbd003eded177fce
+- name: github.com/oxtoacart/emsort
+  version: 5fb62cb0f83928493f3adc5c23fab7e1c9fb91e7
 - name: github.com/stretchr/testify
   version: d77da356e56a7428ad25149ca77381849a6a5232
   subpackages:
   - assert
-- name: github.com/tecbot/gorocksdb
-  version: ada6b3b32ebde5d5ea0fa363a0327082361d5873
 - name: github.com/vharitonsky/iniflags
   version: 743d6901e7ca8ab61ac533a8c49939ac8b560e72
+- name: github.com/Workiva/go-datastructures
+  version: 9398e38ebb7eb017f923e6aca1e0f5aa32461685
+  subpackages:
+  - trie/yfast
+  - trie/xfast
 - name: github.com/xwb1989/sqlparser
   version: dbfc8580724c42e86a20e9586b75a65b806cd88b
   subpackages:
@@ -84,10 +86,44 @@ imports:
   - dependency/bson
   - dependency/bytes2
   - dependency/hack
-- name: gopkg.in/readline.v1
-  version: 62c6fe6193755f722b8b8788aa7357be55a50ff1
-- name: gopkg.in/sourcemap.v1
-  version: 8cd1e2e0ddc78dcb4511bcb184d23171bed15c67
+- name: golang.org/x/net
+  version: 1358eff22f0dd0c54fc521042cc607f6ff4b531a
   subpackages:
-  - base64vlq
+  - context
+  - http2
+  - trace
+  - http2/hpack
+  - lex/httplex
+  - internal/timeseries
+- name: golang.org/x/sys
+  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  subpackages:
+  - unix
+  - windows
+- name: google.golang.org/appengine
+  version: 4f7eeb5305a4ba1966344836ba4af9996b7b4e05
+  subpackages:
+  - datastore
+  - internal
+  - internal/datastore
+  - internal/app_identity
+  - internal/modules
+  - internal/base
+  - internal/log
+  - internal/remote_api
+- name: google.golang.org/grpc
+  version: 52f6504dc290bd928a8139ba94e3ab32ed9a6273
+  subpackages:
+  - codes
+  - credentials
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - transport
+  - peer
+- name: gopkg.in/vmihailenco/msgpack.v2
+  version: 38f3708c44f1402aeb2f137dd9a9dfb12bae2204
+  subpackages:
+  - codes
 devImports: []
