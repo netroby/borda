@@ -72,6 +72,8 @@ func main() {
 		go rpc.Serve(db, cl)
 	}
 
+	log.Debugf("Sampling %f percent of inbound data", *sampleRate*100)
+
 	h := &borda.Handler{Save: s, SampleRate: *sampleRate}
 	go h.Report()
 	serverErr := http.Serve(hl, h)

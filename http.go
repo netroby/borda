@@ -33,8 +33,6 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		h.SampleRate = 1
 	}
 
-	log.Debugf("Sampling %f of inbound data", h.SampleRate*100)
-
 	if req.Method != http.MethodPost {
 		resp.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprintf(resp, "Method %v not allowed\n", req.Method)
