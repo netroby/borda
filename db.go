@@ -9,9 +9,10 @@ import (
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
 func TDBSave(dir string, schemaFile string, ispdb string) (SaveFunc, *zenodb.DB, error) {
 	db, err := zenodb.NewDB(&zenodb.DBOpts{
-		Dir:         dir,
-		SchemaFile:  schemaFile,
-		ISPDatabase: ispdb,
+		Dir:                   dir,
+		SchemaFile:            schemaFile,
+		ISPDatabase:           ispdb,
+		DiscardOnBackPressure: true,
 	})
 	if err != nil {
 		return nil, nil, err

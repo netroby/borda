@@ -3,6 +3,9 @@ package borda
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"sync/atomic"
 	"time"
@@ -20,11 +23,18 @@ const (
 // to the database.
 type Handler struct {
 	Save                 SaveFunc
+	SampleRate           float64
 	receivedMeasurements int64
 }
 
 // ServeHTTP implements the http.Handler interface and supports publishing measurements via HTTP.
 func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+	if h.SampleRate == 0 {
+		h.SampleRate = 1
+	}
+
+	log.Debugf("Sampling %f of inbound data", h.SampleRate*100)
+
 	if req.Method != http.MethodPost {
 		resp.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprintf(resp, "Method %v not allowed\n", req.Method)
@@ -38,37 +48,42 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	dec := json.NewDecoder(req.Body)
-	var measurements []*Measurement
-	err := dec.Decode(&measurements)
-	if err != nil {
-		badRequest(resp, "Error decoding JSON: %v", err)
-		return
-	}
-
-	if len(measurements) == 0 {
-		badRequest(resp, "Please include at least 1 measurement", err)
-		return
-	}
-
-	for _, m := range measurements {
-		if m.Name == "" {
-			badRequest(resp, "Missing name")
-			return
-		}
-
-		if m.Values == nil || len(m.Values) == 0 {
-			badRequest(resp, "Need at least one value")
-			return
-		}
-	}
-
-	atomic.AddInt64(&h.receivedMeasurements, int64(len(measurements)))
-	log.Tracef("Received %d measurements", len(measurements))
-	for _, m := range measurements {
-		err := h.Save(m)
+	defer req.Body.Close()
+	if rand.Float64() >= h.SampleRate {
+		io.Copy(ioutil.Discard, req.Body)
+	} else {
+		dec := json.NewDecoder(req.Body)
+		var measurements []*Measurement
+		err := dec.Decode(&measurements)
 		if err != nil {
-			log.Errorf("Error saving measurement, continuing: %v", err)
+			badRequest(resp, "Error decoding JSON: %v", err)
+			return
+		}
+
+		if len(measurements) == 0 {
+			badRequest(resp, "Please include at least 1 measurement", err)
+			return
+		}
+
+		for _, m := range measurements {
+			if m.Name == "" {
+				badRequest(resp, "Missing name")
+				return
+			}
+
+			if m.Values == nil || len(m.Values) == 0 {
+				badRequest(resp, "Need at least one value")
+				return
+			}
+		}
+
+		atomic.AddInt64(&h.receivedMeasurements, int64(len(measurements)))
+		log.Tracef("Received %d measurements", len(measurements))
+		for _, m := range measurements {
+			err := h.Save(m)
+			if err != nil {
+				log.Errorf("Error saving measurement, continuing: %v", err)
+			}
 		}
 	}
 

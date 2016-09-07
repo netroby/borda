@@ -26,6 +26,7 @@ var (
 	pkfile      = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
 	certfile    = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
 	ispdb       = flag.String("ispdb", "", "In order to enable ISP functions, point this to an IP2Location Lite ISP database file like the one here - https://lite.ip2location.com/database/ip-asn")
+	sampleRate  = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
 )
 
 func main() {
@@ -71,7 +72,7 @@ func main() {
 		go rpc.Serve(db, cl)
 	}
 
-	h := &borda.Handler{Save: s}
+	h := &borda.Handler{Save: s, SampleRate: *sampleRate}
 	go h.Report()
 	serverErr := http.Serve(hl, h)
 	if serverErr != nil {
