@@ -27,6 +27,7 @@ var (
 	certfile    = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
 	ispdb       = flag.String("ispdb", "", "In order to enable ISP functions, point this to an IP2Location Lite ISP database file like the one here - https://lite.ip2location.com/database/ip-asn")
 	sampleRate  = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
+	authToken   = flag.String("authtoken", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
 )
 
 func main() {
@@ -50,7 +51,7 @@ func main() {
 		log.Fatalf("Unable to listen for reports: %v", err)
 	}
 	fmt.Fprintf(os.Stdout, "Listening for report connections at %v\n", rl.Addr())
-	r := &report.Handler{DB: db}
+	r := &report.Handler{DB: db, AuthToken: *authToken}
 	go func() {
 		serverErr := http.Serve(rl, r)
 		if serverErr != nil {

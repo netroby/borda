@@ -1,15 +1,19 @@
 package report
 
 import (
+	"encoding/csv"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/dustin/go-humanize"
 	"github.com/getlantern/golog"
 	"github.com/getlantern/zenodb"
+)
+
+const (
+	XAuthToken = "X-Auth-Token"
 )
 
 var (
@@ -17,7 +21,8 @@ var (
 )
 
 type Handler struct {
-	DB *zenodb.DB
+	DB        *zenodb.DB
+	AuthToken string
 }
 
 // ServeHTTP implements the http.Handler interface and supports querying via
@@ -29,10 +34,17 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	resp.Header().Set("Content-Type", "text/plain")
+	authToken := req.Header.Get(XAuthToken)
+	if authToken == "" || authToken != h.AuthToken {
+		log.Errorf("Missing or bad auth token: %v", authToken)
+		resp.WriteHeader(http.StatusForbidden)
+		return
+	}
+	resp.Header().Set("Content-Type", "text/csv")
 	sql, err := url.QueryUnescape(req.URL.RawQuery)
 	if err != nil {
 		badRequest(resp, "Please url encode your sql query")
+		return
 	}
 	if sql == "" {
 		badRequest(resp, "Please specify some sql in your query")
@@ -47,6 +59,7 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 
 	result, err := aq.Run()
 	if err != nil {
+		log.Error(err)
 		resp.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(resp, "%v\n", err)
 		return
@@ -54,98 +67,56 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 
 	porcelain := strings.EqualFold("/porcelain", req.URL.Path)
 
+	w := csv.NewWriter(resp)
 	if !porcelain {
-		fmt.Fprintf(resp, "------------- %v ----------------\n", result.Table)
-		fmt.Fprintln(resp, sql)
-		fmt.Fprintln(resp)
-		fmt.Fprintf(resp, "# As Of:      %v\n", result.AsOf)
-		fmt.Fprintf(resp, "# Until:      %v\n", result.Until)
-		fmt.Fprintf(resp, "# Resolution: %v\n", result.Resolution)
-		fmt.Fprintf(resp, "# Group By:   %v\n\n", strings.Join(result.GroupBy, " "))
-
-		fmt.Fprintf(resp, "# Query Runtime:  %v\n\n", result.Stats.Runtime)
-
-		fmt.Fprintln(resp, "# Key Statistics")
-		fmt.Fprintf(resp, "#   Scanned:       %v\n", humanize.Comma(result.Stats.Scanned))
-		fmt.Fprintf(resp, "#   Filter Pass:   %v\n", humanize.Comma(result.Stats.FilterPass))
-		fmt.Fprintf(resp, "#   Read Value:    %v\n", humanize.Comma(result.Stats.ReadValue))
-		fmt.Fprintf(resp, "#   Valid:         %v\n", humanize.Comma(result.Stats.DataValid))
-		fmt.Fprintf(resp, "#   In Time Range: %v\n\n", humanize.Comma(result.Stats.InTimeRange))
-
-	}
-
-	// Calculate widths for dimensions and fields
-	dimWidths := make([]int, len(result.GroupBy))
-	fieldWidths := make([]int, len(result.FieldNames))
-
-	for i, dim := range result.GroupBy {
-		width := len(dim)
-		if width > dimWidths[i] {
-			dimWidths[i] = width
+		header := make([]string, 0, 1+len(result.GroupBy)+len(result.FieldNames))
+		header = append(header, "time")
+		for _, dim := range result.GroupBy {
+			header = append(header, dim)
+		}
+		for _, field := range result.FieldNames {
+			header = append(header, field)
+		}
+		writeErr := w.Write(header)
+		if writeErr != nil {
+			log.Error(writeErr)
+			return
 		}
 	}
 
-	for i, field := range result.FieldNames {
-		width := len(field)
-		if width > fieldWidths[i] {
-			fieldWidths[i] = width
-		}
-	}
-
+	i := 0
 	for _, row := range result.Rows {
-		for i, val := range row.Dims {
-			width := len(fmt.Sprint(val))
-			if width > dimWidths[i] {
-				dimWidths[i] = width
-			}
+		line := make([]string, 0, 1+len(row.Dims)+len(row.Values))
+		line = append(line, result.Until.Add(-1*time.Duration(row.Period)*result.Resolution).In(time.UTC).Format(time.RFC3339))
+		for _, dim := range row.Dims {
+			line = append(line, fmt.Sprint(nilToBlank(dim)))
 		}
-
-		for i, val := range row.Values {
-			width := len(fmt.Sprint(val))
-			if width > fieldWidths[i] {
-				fieldWidths[i] = width
-			}
+		for _, val := range row.Values {
+			line = append(line, fmt.Sprintf("%f", val))
+		}
+		writeErr := w.Write(line)
+		if writeErr != nil {
+			log.Error(writeErr)
+			return
+		}
+		i++
+		if i%100 == 0 {
+			w.Flush()
 		}
 	}
 
-	// Create formats for dims and fields
-	dimFormats := make([]string, 0, len(dimWidths))
-	fieldLabelFormats := make([]string, 0, len(fieldWidths))
-	fieldFormats := make([]string, 0, len(fieldWidths))
-	for _, width := range dimWidths {
-		dimFormats = append(dimFormats, "%-"+fmt.Sprint(width+4)+"v")
-	}
-	for _, width := range fieldWidths {
-		fieldLabelFormats = append(fieldLabelFormats, "%"+fmt.Sprint(width+4)+"v")
-		fieldFormats = append(fieldFormats, "%"+fmt.Sprint(width+4)+".4f")
-	}
-
-	if !porcelain {
-		// Print header row
-		fmt.Fprintf(resp, "# %-33v", "time")
-		for i, dim := range result.GroupBy {
-			fmt.Fprintf(resp, dimFormats[i], dim)
-		}
-		for i, field := range result.FieldNames {
-			fmt.Fprintf(resp, fieldLabelFormats[i], field)
-		}
-		fmt.Fprint(resp, "\n")
-	}
-
-	for _, row := range result.Rows {
-		fmt.Fprintf(resp, "%-35v", result.Until.Add(-1*time.Duration(row.Period)*result.Resolution).Format(time.RFC1123))
-		for i, dim := range row.Dims {
-			fmt.Fprintf(resp, dimFormats[i], dim)
-		}
-		for i, val := range row.Values {
-			fmt.Fprintf(resp, fieldFormats[i], val)
-		}
-		fmt.Fprint(resp, "\n")
-	}
+	w.Flush()
 }
 
 func badRequest(resp http.ResponseWriter, msg string, args ...interface{}) {
 	log.Errorf(msg, args...)
 	resp.WriteHeader(http.StatusBadRequest)
 	fmt.Fprintf(resp, msg+"\n", args...)
+}
+
+func nilToBlank(val interface{}) interface{} {
+	if val == nil {
+		return ""
+	}
+	return val
 }
