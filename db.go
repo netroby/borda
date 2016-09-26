@@ -12,6 +12,7 @@ func TDBSave(dir string, schemaFile string, ispdb string, maxWALAge time.Duratio
 		Dir:               dir,
 		SchemaFile:        schemaFile,
 		ISPDatabase:       ispdb,
+		WALSyncInterval:   5 * time.Second,
 		MaxWALAge:         maxWALAge,
 		WALCompressionAge: walCompressionAge,
 	})

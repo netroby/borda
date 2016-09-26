@@ -30,7 +30,7 @@ var (
 	sampleRate        = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
 	authToken         = flag.String("authtoken", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
 	maxWALAge         = flag.Duration("maxwalage", 336*time.Hour, "Maximum age for WAL files. Files older than this will be deleted. Defaults to 336 hours (2 weeks)")
-	walCompressionAge = flag.Duration("walcompressage", 24*time.Hour, "Age at which to start compressing WAL files with gzip. Defaults to 24 hours.")
+	walCompressionAge = flag.Duration("walcompressage", 1*time.Hour, "Age at which to start compressing WAL files with gzip. Defaults to 1 hour.")
 )
 
 func main() {
