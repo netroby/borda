@@ -7,6 +7,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"time"
 
 	"github.com/getlantern/borda"
 	"github.com/getlantern/borda/report"
@@ -19,15 +20,17 @@ import (
 var (
 	log = golog.LoggerFor("borda")
 
-	httpsaddr   = flag.String("httpsaddr", ":443", "The address at which to listen for HTTPS connections")
-	reportsaddr = flag.String("reportsaddr", "localhost:14443", "The address at which to listen for HTTPS connections to the reports")
-	cliaddr     = flag.String("cliaddr", "localhost:17712", "The address at which to listen for gRPC cli connections, defaults to localhost:17712")
-	pprofAddr   = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
-	pkfile      = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
-	certfile    = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
-	ispdb       = flag.String("ispdb", "", "In order to enable ISP functions, point this to an IP2Location Lite ISP database file like the one here - https://lite.ip2location.com/database/ip-asn")
-	sampleRate  = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
-	authToken   = flag.String("authtoken", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
+	httpsaddr         = flag.String("httpsaddr", ":443", "The address at which to listen for HTTPS connections")
+	reportsaddr       = flag.String("reportsaddr", "localhost:14443", "The address at which to listen for HTTPS connections to the reports")
+	cliaddr           = flag.String("cliaddr", "localhost:17712", "The address at which to listen for gRPC cli connections, defaults to localhost:17712")
+	pprofAddr         = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
+	pkfile            = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
+	certfile          = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
+	ispdb             = flag.String("ispdb", "", "In order to enable ISP functions, point this to an IP2Location Lite ISP database file like the one here - https://lite.ip2location.com/database/ip-asn")
+	sampleRate        = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
+	authToken         = flag.String("authtoken", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
+	maxWALAge         = flag.Duration("maxwalage", 336*time.Hour, "Maximum age for WAL files. Files older than this will be deleted. Defaults to 336 hours (2 weeks)")
+	walCompressionAge = flag.Duration("walcompressage", 24*time.Hour, "Age at which to start compressing WAL files with gzip. Defaults to 24 hours.")
 )
 
 func main() {
@@ -41,7 +44,7 @@ func main() {
 			}
 		}()
 	}
-	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *ispdb)
+	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *ispdb, *maxWALAge, *walCompressionAge)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
