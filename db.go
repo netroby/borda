@@ -3,15 +3,27 @@ package borda
 import (
 	"time"
 
+	"github.com/getlantern/goexpr/isp"
+	"github.com/getlantern/goexpr/isp/maxmind"
 	"github.com/getlantern/zenodb"
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
 func TDBSave(dir string, schemaFile string, ispdb string, maxWALAge time.Duration, walCompressionAge time.Duration) (SaveFunc, *zenodb.DB, error) {
+	var ispProvider isp.Provider
+	var ispErr error
+	if ispdb != "" {
+		log.Debugf("Using maxmind db at %v", ispdb)
+		ispProvider, ispErr = maxmind.NewProvider(ispdb)
+		if ispErr != nil {
+			return nil, nil, ispErr
+		}
+	}
+
 	db, err := zenodb.NewDB(&zenodb.DBOpts{
 		Dir:               dir,
 		SchemaFile:        schemaFile,
-		ISPDatabase:       ispdb,
+		ISPProvider:       ispProvider,
 		WALSyncInterval:   5 * time.Second,
 		MaxWALAge:         maxWALAge,
 		WALCompressionAge: walCompressionAge,

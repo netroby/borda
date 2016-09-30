@@ -26,7 +26,7 @@ var (
 	pprofAddr         = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
 	pkfile            = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
 	certfile          = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
-	ispdb             = flag.String("ispdb", "", "In order to enable ISP functions, point this to an IP2Location Lite ISP database file like the one here - https://lite.ip2location.com/database/ip-asn")
+	ispdb             = flag.String("ispdb", "", "In order to enable ISP functions, point this to a maxmind ISP database file")
 	sampleRate        = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
 	authToken         = flag.String("authtoken", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
 	maxWALAge         = flag.Duration("maxwalage", 336*time.Hour, "Maximum age for WAL files. Files older than this will be deleted. Defaults to 336 hours (2 weeks)")
