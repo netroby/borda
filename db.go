@@ -6,10 +6,12 @@ import (
 	"github.com/getlantern/goexpr/isp"
 	"github.com/getlantern/goexpr/isp/maxmind"
 	"github.com/getlantern/zenodb"
+	"github.com/getlantern/zenodb/sql"
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
 func TDBSave(dir string, schemaFile string, ispdb string, maxWALAge time.Duration, walCompressionAge time.Duration) (SaveFunc, *zenodb.DB, error) {
+	sql.RegisterUnaryDIMFunction("HOSTNAME", BuildHostname)
 	var ispProvider isp.Provider
 	var ispErr error
 	if ispdb != "" {

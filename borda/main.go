@@ -12,6 +12,7 @@ import (
 	"github.com/getlantern/borda"
 	"github.com/getlantern/borda/report"
 	"github.com/getlantern/golog"
+	"github.com/getlantern/redis"
 	"github.com/getlantern/tlsdefaults"
 	"github.com/getlantern/zenodb/rpc"
 	"github.com/vharitonsky/iniflags"
@@ -31,6 +32,10 @@ var (
 	authToken         = flag.String("authtoken", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
 	maxWALAge         = flag.Duration("maxwalage", 336*time.Hour, "Maximum age for WAL files. Files older than this will be deleted. Defaults to 336 hours (2 weeks)")
 	walCompressionAge = flag.Duration("walcompressage", 1*time.Hour, "Age at which to start compressing WAL files with gzip. Defaults to 1 hour.")
+	redisAddr         = flag.String("redis", "", "Redis address in \"redis[s]://host:port\" format")
+	redisCA           = flag.String("redisca", "", "Certificate for redislabs's CA")
+	redisClientPK     = flag.String("redisclientpk", "", "Private key for authenticating client to redis's stunnel")
+	redisClientCert   = flag.String("redisclientcert", "", "Certificate for authenticating client to redis's stunnel")
 )
 
 func main() {
@@ -44,6 +49,21 @@ func main() {
 			}
 		}()
 	}
+
+	if *redisAddr != "" {
+		redisClient, err := redis.NewClient(&redis.Opts{
+			RedisURL:       *redisAddr,
+			RedisCAFile:    *redisCA,
+			ClientPKFile:   *redisClientPK,
+			ClientCertFile: *redisClientCert,
+		})
+		if err == nil {
+			borda.SetRedis(redisClient)
+		} else {
+			log.Errorf("Unable to connect to redis: %v", err)
+		}
+	}
+
 	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *ispdb, *maxWALAge, *walCompressionAge)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
