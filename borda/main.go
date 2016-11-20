@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -29,9 +28,10 @@ var (
 	certfile          = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
 	ispdb             = flag.String("ispdb", "", "In order to enable ISP functions, point this to a maxmind ISP database file")
 	sampleRate        = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
-	authToken         = flag.String("authtoken", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
+	password          = flag.String("password", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
 	maxWALAge         = flag.Duration("maxwalage", 336*time.Hour, "Maximum age for WAL files. Files older than this will be deleted. Defaults to 336 hours (2 weeks)")
 	walCompressionAge = flag.Duration("walcompressage", 1*time.Hour, "Age at which to start compressing WAL files with gzip. Defaults to 1 hour.")
+	numPartitions     = flag.Int("numpartitions", 1, "The number of partitions available to distribute amongst followers")
 	redisAddr         = flag.String("redis", "", "Redis address in \"redis[s]://host:port\" format")
 	redisCA           = flag.String("redisca", "", "Certificate for redislabs's CA")
 	redisClientPK     = flag.String("redisclientpk", "", "Private key for authenticating client to redis's stunnel")
@@ -64,7 +64,7 @@ func main() {
 		}
 	}
 
-	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *ispdb, *maxWALAge, *walCompressionAge)
+	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *ispdb, *maxWALAge, *walCompressionAge, *numPartitions)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
@@ -74,7 +74,7 @@ func main() {
 		log.Fatalf("Unable to listen for reports: %v", err)
 	}
 	fmt.Fprintf(os.Stdout, "Listening for report connections at %v\n", rl.Addr())
-	r := &report.Handler{DB: db, AuthToken: *authToken}
+	r := &report.Handler{DB: db, AuthToken: *password}
 	go func() {
 		serverErr := http.Serve(rl, r)
 		if serverErr != nil {
@@ -89,11 +89,13 @@ func main() {
 	fmt.Fprintf(os.Stdout, "Listening for HTTPS connections at %v\n", hl.Addr())
 
 	if *cliaddr != "" {
-		cl, err := net.Listen("tcp", *cliaddr)
+		cl, err := tlsdefaults.Listen(*cliaddr, *pkfile, *certfile)
 		if err != nil {
 			log.Fatalf("Unable to listen at cliaddr %v: %v", *cliaddr, err)
 		}
-		go rpc.Serve(db, cl)
+		go rpc.Serve(db, cl, &rpc.ServerOpts{
+			Password: *password,
+		})
 	}
 
 	log.Debugf("Sampling %f percent of inbound data", *sampleRate*100)
