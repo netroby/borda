@@ -10,7 +10,7 @@ import (
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
-func TDBSave(dir string, schemaFile string, ispdb string, maxWALAge time.Duration, walCompressionAge time.Duration) (SaveFunc, *zenodb.DB, error) {
+func TDBSave(dir string, schemaFile string, ispdb string, maxWALAge time.Duration, walCompressionAge time.Duration, numPartitions int) (SaveFunc, *zenodb.DB, error) {
 	sql.RegisterUnaryDIMFunction("HOSTNAME", BuildHostname)
 	var ispProvider isp.Provider
 	var ispErr error
@@ -29,6 +29,8 @@ func TDBSave(dir string, schemaFile string, ispdb string, maxWALAge time.Duratio
 		WALSyncInterval:   5 * time.Second,
 		MaxWALAge:         maxWALAge,
 		WALCompressionAge: walCompressionAge,
+		Passthrough:       true,
+		NumPartitions:     numPartitions,
 	})
 	if err != nil {
 		return nil, nil, err

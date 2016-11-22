@@ -7,3 +7,14 @@ import:
   - assert
 - package: github.com/vharitonsky/iniflags
 - package: github.com/getlantern/errors
+- package: golang.org/x/net
+  vcs: git
+  repo: https://github.com/golang/net
+  subpackages:
+  - context
+- package: golang.org/x/sys/
+  vcs: git
+  repo: https://github.com/golang/sys
+  subpackages:
+  - windows
+  - unix

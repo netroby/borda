@@ -51,13 +51,13 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	aq, err := h.DB.SQLQuery(sql)
+	aq, err := h.DB.SQLQuery(sql, false)
 	if err != nil {
 		badRequest(resp, err.Error())
 		return
 	}
 
-	result, err := aq.Run()
+	result, err := aq.Run(false)
 	if err != nil {
 		log.Error(err)
 		resp.WriteHeader(http.StatusInternalServerError)
