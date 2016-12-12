@@ -20,10 +20,7 @@ build:
     - script:
       name: glide install
       code: |
-        cd /tmp
-        curl -L https://github.com/Masterminds/glide/releases/download/0.10.2/glide-0.10.2-linux-amd64.tar.gz -o glide.tar.gz
-        tar -xf glide.tar.gz
-        sudo mv linux-amd64/glide /usr/local/bin/
+        curl https://glide.sh/get | sh
     - script:
       name: glide update
       code: |
