@@ -36,6 +36,7 @@ var (
 	redisCA           = flag.String("redisca", "", "Certificate for redislabs's CA")
 	redisClientPK     = flag.String("redisclientpk", "", "Private key for authenticating client to redis's stunnel")
 	redisClientCert   = flag.String("redisclientcert", "", "Certificate for authenticating client to redis's stunnel")
+	redisCacheSize    = flag.Int("rediscachesize", 25000, "Configures the maximum size of redis caches for HGET operations, defaults to 25,000 per hash")
 )
 
 func main() {
@@ -66,7 +67,7 @@ func main() {
 		}
 	}
 
-	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *aliasesFile, *ispdb, redisClient, *maxWALAge, *walCompressionAge, *numPartitions)
+	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALAge, *walCompressionAge, *numPartitions)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
