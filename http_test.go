@@ -33,17 +33,17 @@ var (
 		Dimensions: good.Dimensions,
 	}
 	missingTS = &Measurement{
-		Name:       "mymeasure",
+		Name:       "combined",
 		Values:     good.Values,
 		Dimensions: good.Dimensions,
 	}
 	missingValues = &Measurement{
-		Name:       "mymeasure",
+		Name:       "combined",
 		Ts:         time.Now(),
 		Dimensions: good.Dimensions,
 	}
 	emptyValues = &Measurement{
-		Name:       "mymeasure",
+		Name:       "combined",
 		Ts:         time.Now(),
 		Values:     map[string]float64{},
 		Dimensions: good.Dimensions,
@@ -72,9 +72,6 @@ func TestHTTPRoundTrip(t *testing.T) {
 	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{missingName})
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
-	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{missingTS})
-	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-
 	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{missingValues})
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
@@ -86,6 +83,9 @@ func TestHTTPRoundTrip(t *testing.T) {
 
 	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{})
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
+
+	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{missingTS})
+	assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
 	resp, _ = httpRequest(httpAddr, goodContentType, []*Measurement{good})
 	if !assert.Equal(t, http.StatusCreated, resp.StatusCode) {
