@@ -14,7 +14,7 @@ import (
 	"github.com/getlantern/tlsdefaults"
 	"github.com/getlantern/zenodb/rpc"
 	"github.com/vharitonsky/iniflags"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
 var (

@@ -6,7 +6,7 @@ import (
 	"github.com/getlantern/goexpr/isp"
 	"github.com/getlantern/goexpr/isp/maxmind"
 	"github.com/getlantern/zenodb"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
