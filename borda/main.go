@@ -9,24 +9,24 @@ import (
 	"time"
 
 	"github.com/getlantern/borda"
-	"github.com/getlantern/borda/report"
 	"github.com/getlantern/golog"
-	"github.com/getlantern/redis"
+	gredis "github.com/getlantern/redis"
 	"github.com/getlantern/tlsdefaults"
 	"github.com/getlantern/zenodb/rpc"
 	"github.com/vharitonsky/iniflags"
+	"gopkg.in/redis.v3"
 )
 
 var (
 	log = golog.LoggerFor("borda")
 
 	httpsaddr         = flag.String("httpsaddr", ":443", "The address at which to listen for HTTPS connections")
-	reportsaddr       = flag.String("reportsaddr", "localhost:14443", "The address at which to listen for HTTPS connections to the reports")
 	cliaddr           = flag.String("cliaddr", "localhost:17712", "The address at which to listen for gRPC cli connections, defaults to localhost:17712")
 	pprofAddr         = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
 	pkfile            = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
 	certfile          = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
 	ispdb             = flag.String("ispdb", "", "In order to enable ISP functions, point this to a maxmind ISP database file")
+	aliasesFile       = flag.String("aliases", "aliases.props", "Optionally specify the path to a file containing expression aliases in the form alias=template(%v,%v) with one alias per line")
 	sampleRate        = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
 	password          = flag.String("password", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
 	maxWALAge         = flag.Duration("maxwalage", 336*time.Hour, "Maximum age for WAL files. Files older than this will be deleted. Defaults to 336 hours (2 weeks)")
@@ -50,37 +50,26 @@ func main() {
 		}()
 	}
 
+	var redisClient *redis.Client
 	if *redisAddr != "" {
-		redisClient, err := redis.NewClient(&redis.Opts{
+		var redisErr error
+		redisClient, redisErr = gredis.NewClient(&gredis.Opts{
 			RedisURL:       *redisAddr,
 			RedisCAFile:    *redisCA,
 			ClientPKFile:   *redisClientPK,
 			ClientCertFile: *redisClientCert,
 		})
-		if err == nil {
-			borda.SetRedis(redisClient)
+		if redisErr == nil {
+			log.Debugf("Connected to Redis at %v", *redisAddr)
 		} else {
-			log.Errorf("Unable to connect to redis: %v", err)
+			log.Errorf("Unable to connect to redis: %v", redisErr)
 		}
 	}
 
-	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *ispdb, *maxWALAge, *walCompressionAge, *numPartitions)
+	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *aliasesFile, *ispdb, redisClient, *maxWALAge, *walCompressionAge, *numPartitions)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
-
-	rl, err := tlsdefaults.Listen(*reportsaddr, *pkfile, *certfile)
-	if err != nil {
-		log.Fatalf("Unable to listen for reports: %v", err)
-	}
-	fmt.Fprintf(os.Stdout, "Listening for report connections at %v\n", rl.Addr())
-	r := &report.Handler{DB: db, AuthToken: *password}
-	go func() {
-		serverErr := http.Serve(rl, r)
-		if serverErr != nil {
-			log.Errorf("Error serving reports: %v", serverErr)
-		}
-	}()
 
 	hl, err := tlsdefaults.Listen(*httpsaddr, *pkfile, *certfile)
 	if err != nil {
