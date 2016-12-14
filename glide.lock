@@ -1,5 +1,5 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2016-12-13T21:53:10.033852756-06:00
+updated: 2016-12-13T22:10:39.979725975-06:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: c32d31af94b0e9d3b2877e49c1a581ad5a793343
@@ -18,7 +18,7 @@ imports:
 - name: github.com/getlantern/filepersist
   version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
 - name: github.com/getlantern/goexpr
-  version: 79955635b2b62f40234c8610b726cf0a5ea47454
+  version: c5f8e1bcce6a6a9956e14202753482d251b8c0b6
   subpackages:
   - geo
   - isp
