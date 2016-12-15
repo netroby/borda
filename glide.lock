@@ -1,5 +1,5 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2016-12-13T22:10:39.979725975-06:00
+updated: 2016-12-15T11:38:38.567461426-06:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: c32d31af94b0e9d3b2877e49c1a581ad5a793343
@@ -18,7 +18,7 @@ imports:
 - name: github.com/getlantern/filepersist
   version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
 - name: github.com/getlantern/goexpr
-  version: c5f8e1bcce6a6a9956e14202753482d251b8c0b6
+  version: 5f68d69c818b7a07770a2ca0cfdc988235449a7c
   subpackages:
   - geo
   - isp
@@ -47,11 +47,11 @@ imports:
 - name: github.com/getlantern/vtime
   version: dc1e573cf9918131774034baa8eade77ef901ea3
 - name: github.com/getlantern/wal
-  version: 4f9fc7636ad0f027ecb5b96a1d160880c34b77c9
+  version: c6fd027cd5b55d7329d426dadc4a8e8000ef7f26
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: 738fb780b7f774a570c4048b88ce417d34baa449
+  version: 7eeea1b226f15543fd30190f8fd038e4543d96ec
   subpackages:
   - bytetree
   - core
@@ -96,7 +96,7 @@ imports:
   - dependency/hack
   - dependency/sqltypes
 - name: golang.org/x/net
-  version: cfae461cedfdcab6e261a26eb77db53695623303
+  version: 468bac874d80e6ca892ecbb9bf09c72519b5b751
   repo: https://github.com/golang/net
   vcs: git
   subpackages:
