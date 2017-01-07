@@ -13,6 +13,8 @@ import (
 	gredis "github.com/getlantern/redis"
 	"github.com/getlantern/tlsdefaults"
 	"github.com/getlantern/zenodb/rpc"
+	"github.com/getlantern/zenodb/web"
+	"github.com/gorilla/mux"
 	"github.com/vharitonsky/iniflags"
 	"gopkg.in/redis.v5"
 )
@@ -25,6 +27,11 @@ var (
 	pprofAddr         = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
 	pkfile            = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
 	certfile          = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
+	cookieHashKey     = flag.String("cookiehashkey", "9Cb7CqeP3PVSQv7nq6B9XUaQmjXeA4RUHQctywefW7gu9fmc4wSPY7AVzhA9497H", "key to use for HMAC authentication of web auth cookies, should be 64 bytes, defaults to random 64 bytes if not specified")
+	cookieBlockKey    = flag.String("cookieblockkey", "BtRxmTBveQUcX8ZYdfnrCN2mUB7z2juP", "key to use for encrypting web auth cookies, should be 32 bytes, defaults to random 32 bytes if not specified")
+	oauthClientID     = flag.String("oauthclientid", "2780eb96d3834a26ebc2", "id to use for oauth client to connect to GitHub")
+	oauthClientSecret = flag.String("oauthclientsecret", "da57775e1c2d7956a50e81501491eabe48d45c14", "secret id to use for oauth client to connect to GitHub")
+	gitHubOrg         = flag.String("githuborg", "getlantern", "the GitHug org against which web users are authenticated")
 	ispdb             = flag.String("ispdb", "", "In order to enable ISP functions, point this to a maxmind ISP database file")
 	aliasesFile       = flag.String("aliases", "aliases.props", "Optionally specify the path to a file containing expression aliases in the form alias=template(%v,%v) with one alias per line")
 	sampleRate        = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
@@ -92,7 +99,19 @@ func main() {
 
 	h := &borda.Handler{Save: s, SampleRate: *sampleRate}
 	go h.Report()
-	serverErr := http.Serve(hl, h)
+	router := mux.NewRouter()
+	router.Handle("/measurements", h)
+	err = web.Configure(db, router, &web.Opts{
+		OAuthClientID:     *oauthClientID,
+		OAuthClientSecret: *oauthClientSecret,
+		GitHubOrg:         *gitHubOrg,
+		HashKey:           *cookieHashKey,
+		BlockKey:          *cookieBlockKey,
+	})
+	if err != nil {
+		panic(fmt.Errorf("Unable to configure web: %v", err))
+	}
+	serverErr := http.Serve(hl, router)
 	if serverErr != nil {
 		log.Fatalf("Error serving HTTPS: %v", serverErr)
 	}
