@@ -1,10 +1,10 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-01-04T17:03:47.156506591-06:00
+updated: 2017-01-06T19:03:09.233332842-06:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
 - name: github.com/dustin/go-humanize
-  version: ef638b6c2e62b857442c6443dace9366a48c0ee2
+  version: 904a49491cd5fb5cba832fac98e7e87d56b690a4
 - name: github.com/getlantern/byteexec
   version: 2e21fedeb225921a8dc40321cbd114ffd0a302f3
 - name: github.com/getlantern/bytemap
@@ -18,7 +18,7 @@ imports:
 - name: github.com/getlantern/filepersist
   version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
 - name: github.com/getlantern/goexpr
-  version: d2cbf345832257fbe3e03d839e64208f2a18b254
+  version: 2664dae35114cb70a43d0500b56beacd166c2ef3
   subpackages:
   - geo
   - isp
@@ -51,7 +51,7 @@ imports:
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: bcdfa1b895946b7522f747890dd1c0923cc23c03
+  version: 9f2fa70cda39b9d4961d78e8d53e0c17617c3d1d
   subpackages:
   - bytetree
   - core
@@ -105,7 +105,7 @@ imports:
   - dependency/hack
   - dependency/sqltypes
 - name: golang.org/x/net
-  version: 8fd7f25955530b92e73e9e1932a41b522b22ccd9
+  version: 279e8088146c98d22b601754aa950b3d449af152
   repo: https://github.com/golang/net
   vcs: git
   subpackages:
@@ -123,8 +123,15 @@ imports:
   subpackages:
   - unix
   - windows
+- name: golang.org/x/text
+  version: 44f4f658a783b0cee41fe0a23b8fc91d9c120558
+  subpackages:
+  - secure/bidirule
+  - transform
+  - unicode/bidi
+  - unicode/norm
 - name: google.golang.org/appengine
-  version: 08a149cfaee099e6ce4be01c0113a78c85ee1dee
+  version: 8758a385849434ba5eac8aeedcf5192c5a0f5f10
   subpackages:
   - datastore
   - internal
@@ -135,7 +142,7 @@ imports:
   - internal/modules
   - internal/remote_api
 - name: google.golang.org/grpc
-  version: c8105071640ef29fce843ed96983e864bb18eb0e
+  version: 85497e2c516cd289bce5551b840ee27c2a0d6878
   subpackages:
   - codes
   - credentials
