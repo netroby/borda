@@ -37,6 +37,7 @@ func TDBSave(dir string, schemaFile string, aliasesFile string, ispdb string, re
 	if err != nil {
 		return nil, nil, err
 	}
+	db.HandleShutdownSignal()
 
 	go func() {
 		ticker := time.NewTicker(5 * time.Second)

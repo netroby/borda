@@ -1,5 +1,5 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-01-07T21:02:21.269426591-06:00
+updated: 2017-01-08T07:00:33.073848072-06:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
@@ -51,7 +51,7 @@ imports:
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: a1b39985abb395b96d66fb509f544b1c05ec26c9
+  version: 408c6037c3a4989aef6cfdf30568d9b714c1dff5
   subpackages:
   - bytetree
   - core
