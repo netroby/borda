@@ -32,7 +32,6 @@ func TDBSave(dir string, schemaFile string, aliasesFile string, ispdb string, re
 		MaxWALAge:         maxWALAge,
 		WALCompressionAge: walCompressionAge,
 		Passthrough:       true,
-		PartitionBy:       []string{"proxy_host", "client_ip", "app_version", "error"},
 		NumPartitions:     numPartitions,
 	})
 	if err != nil {

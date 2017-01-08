@@ -22,6 +22,7 @@ import (
 var (
 	log = golog.LoggerFor("borda")
 
+	dbdir             = flag.String("dbdir", "zenodata", "The directory in which to place the database files, defaults to 'zenodata'")
 	httpsaddr         = flag.String("httpsaddr", ":443", "The address at which to listen for HTTPS connections")
 	cliaddr           = flag.String("cliaddr", "localhost:17712", "The address at which to listen for gRPC cli connections, defaults to localhost:17712")
 	pprofAddr         = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
@@ -74,7 +75,7 @@ func main() {
 		}
 	}
 
-	s, db, err := borda.TDBSave("zenodata", "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALAge, *walCompressionAge, *numPartitions)
+	s, db, err := borda.TDBSave(*dbdir, "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALAge, *walCompressionAge, *numPartitions)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
