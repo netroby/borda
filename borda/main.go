@@ -75,7 +75,7 @@ func main() {
 		}
 	}
 
-	s, db, err := borda.TDBSave(*dbdir, "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALSize, *walCompressionSize, *numPartitions)
+	s, db, err := borda.TDBSave(*dbdir, "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALSize, *walCompressionSize, *numPartitions, *password)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
