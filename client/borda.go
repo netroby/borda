@@ -126,7 +126,7 @@ func (c *Client) ReducingSubmitter(name string, maxBufferSize int) Submitter {
 		existing, found := buffer[key]
 		if found {
 			for key, value := range values {
-				existing.Values[key] = value.Plus(existing.Values[key])
+				existing.Values[key] = value.Merge(existing.Values[key])
 			}
 			if ts.After(existing.Ts) {
 				existing.Ts = ts

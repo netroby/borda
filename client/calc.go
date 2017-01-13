@@ -9,15 +9,15 @@ type Val interface {
 	// Get gets the final float64 value
 	Get() float64
 
-	// Plus adds another value to this one, using logic specific to the type of
-	// value.
-	Plus(b Val) Val
+	// Merges merges another value with this one, using logic specific to the type
+	// of value.
+	Merge(b Val) Val
 }
 
 // Float is float value that gets reduced by plain addition.
 type Float float64
 
-func (a Float) Plus(b Val) Val {
+func (a Float) Merge(b Val) Val {
 	if b == nil {
 		return a
 	}
@@ -33,7 +33,7 @@ func (a Float) Get() float64 {
 // Min is a float value that gets reduced by taking the lowest value.
 type Min float64
 
-func (a Min) Plus(b Val) Val {
+func (a Min) Merge(b Val) Val {
 	if b == nil {
 		return a
 	}
@@ -52,7 +52,7 @@ func (a Min) Get() float64 {
 // Max is a float value that gets reduced by taking the highest value.
 type Max float64
 
-func (a Max) Plus(b Val) Val {
+func (a Max) Merge(b Val) Val {
 	if b == nil {
 		return a
 	}
@@ -82,7 +82,7 @@ func WeightedAvg(val float64, weight float64) Val {
 // avg holds the total plus a count in order to calculate the arithmatic mean
 type avg [2]float64
 
-func (a avg) Plus(_b Val) Val {
+func (a avg) Merge(_b Val) Val {
 	if _b == nil {
 		return a
 	}

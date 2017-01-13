@@ -6,26 +6,26 @@ import (
 )
 
 func TestFloat(t *testing.T) {
-	assert.Equal(t, 1.0, Float(-1).Plus(Float(2)).Plus(Float(0)).Plus(nil).Get())
+	assert.Equal(t, 1.0, Float(-1).Merge(Float(2)).Merge(Float(0)).Merge(nil).Get())
 }
 
 func TestMin(t *testing.T) {
-	assert.Equal(t, -1.0, Min(-1).Plus(Min(2)).Plus(Min(0)).Plus(nil).Get())
+	assert.Equal(t, -1.0, Min(-1).Merge(Min(2)).Merge(Min(0)).Merge(nil).Get())
 }
 
 func TestMax(t *testing.T) {
-	assert.Equal(t, 2.0, Max(-1).Plus(Max(2)).Plus(Max(0)).Plus(nil).Get())
+	assert.Equal(t, 2.0, Max(-1).Merge(Max(2)).Merge(Max(0)).Merge(nil).Get())
 }
 
 func TestAvg(t *testing.T) {
 	// Note - the subsequent types don't matter
-	a1 := Avg(1).Plus(Float(2))
-	a2 := Avg(10).Plus(Float(20))
-	assert.Equal(t, 8.25, a1.Plus(a2).Plus(nil).Get())
+	a1 := Avg(1).Merge(Float(2))
+	a2 := Avg(10).Merge(Float(20))
+	assert.Equal(t, 8.25, a1.Merge(a2).Merge(nil).Get())
 }
 
 func TestWeightedAvg(t *testing.T) {
-	assert.Equal(t, 3.5, WeightedAvg(2, 5).Plus(WeightedAvg(4, 15)).Plus(nil).Get())
+	assert.Equal(t, 3.5, WeightedAvg(2, 5).Merge(WeightedAvg(4, 15)).Merge(nil).Get())
 	assert.Equal(t, 2.0, WeightedAvg(2, 5).Get())
-	assert.Equal(t, 0.0, WeightedAvg(2, 0).Plus(WeightedAvg(3, 0)).Plus(nil).Get())
+	assert.Equal(t, 0.0, WeightedAvg(2, 0).Merge(WeightedAvg(3, 0)).Merge(nil).Get())
 }
