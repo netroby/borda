@@ -33,7 +33,7 @@ type Measurement struct {
 	// Values contains numeric values of the measurement.
 	//
 	// Example: { "num_errors": 67 }
-	Values map[string]float64 `json:"values,omitempty"`
+	Values map[string]Val `json:"values,omitempty"`
 
 	// Dimensions captures key/value pairs which characterize the measurement.
 	//
@@ -57,15 +57,11 @@ type Options struct {
 	Client *http.Client
 }
 
-// Reducer is a function that merges the newValues into the existingValues for
-// a given measurement.
-type Reducer func(existingValues map[string]float64, newValues map[string]float64)
-
 // Submitter is a functon that submits measurements to borda. If the measurement
 // was successfully queued for submission, this returns nil.
-type Submitter func(values map[string]float64, dimensions map[string]interface{}) error
+type Submitter func(values map[string]Val, dimensions map[string]interface{}) error
 
-type submitter func(key string, ts time.Time, values map[string]float64, jsonDimensions []byte) error
+type submitter func(key string, ts time.Time, values map[string]Val, jsonDimensions []byte) error
 
 // Client is a client that submits measurements to the borda server.
 type Client struct {
@@ -107,11 +103,11 @@ func NewClient(opts *Options) *Client {
 	return b
 }
 
-// ReducingSubmitter returns a Submitter whose measurements are reduced using
-// the specified Reducer. name specifies the name of the measurements and
+// ReducingSubmitter returns a Submitter whose measurements are reduced based on
+// their types. name specifies the name of the measurements and
 // maxBufferSize specifies the maximum number of distinct measurements to buffer
 // within the BatchInterval. Anything past this is discarded.
-func (c *Client) ReducingSubmitter(name string, maxBufferSize int, reduce Reducer) Submitter {
+func (c *Client) ReducingSubmitter(name string, maxBufferSize int) Submitter {
 	if maxBufferSize <= 0 {
 		log.Debugf("maxBufferSize has to be greater than zero, defaulting to 1000")
 		maxBufferSize = 1000
@@ -120,7 +116,7 @@ func (c *Client) ReducingSubmitter(name string, maxBufferSize int, reduce Reduce
 	defer c.mx.Unlock()
 	bufferID := c.nextBufferID
 	c.nextBufferID++
-	submitter := func(key string, ts time.Time, values map[string]float64, jsonDimensions []byte) error {
+	submitter := func(key string, ts time.Time, values map[string]Val, jsonDimensions []byte) error {
 		buffer := c.buffers[bufferID]
 		if buffer == nil {
 			// Lazily initialize buffer
@@ -129,7 +125,9 @@ func (c *Client) ReducingSubmitter(name string, maxBufferSize int, reduce Reduce
 		}
 		existing, found := buffer[key]
 		if found {
-			reduce(existing.Values, values)
+			for key, value := range values {
+				existing.Values[key] = value.Plus(existing.Values[key])
+			}
 			if ts.After(existing.Ts) {
 				existing.Ts = ts
 			}
@@ -147,7 +145,7 @@ func (c *Client) ReducingSubmitter(name string, maxBufferSize int, reduce Reduce
 	}
 	c.submitters[bufferID] = submitter
 
-	return func(values map[string]float64, dimensions map[string]interface{}) error {
+	return func(values map[string]Val, dimensions map[string]interface{}) error {
 		jsonDimensions, encodeErr := json.Marshal(dimensions)
 		if encodeErr != nil {
 			return errors.New("Unable to marshal dimensions: %v", encodeErr)
