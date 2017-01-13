@@ -6,7 +6,6 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
-	"time"
 
 	"github.com/getlantern/borda"
 	"github.com/getlantern/golog"
@@ -75,7 +74,7 @@ func main() {
 		}
 	}
 
-	s, db, err := borda.TDBSave(*dbdir, "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALSize, *walCompressionSize, *numPartitions, *password)
+	s, db, err := borda.TDBSave(*dbdir, "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALSize, *walCompressionSize, *numPartitions)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
@@ -108,6 +107,7 @@ func main() {
 		GitHubOrg:         *gitHubOrg,
 		HashKey:           *cookieHashKey,
 		BlockKey:          *cookieBlockKey,
+		Password:          *password,
 	})
 	if err != nil {
 		panic(fmt.Errorf("Unable to configure web: %v", err))
