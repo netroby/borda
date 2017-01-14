@@ -1,10 +1,10 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-01-09T07:53:24.407119277-06:00
+updated: 2017-01-14T13:41:38.131962131-06:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
 - name: github.com/dustin/go-humanize
-  version: 904a49491cd5fb5cba832fac98e7e87d56b690a4
+  version: 7a41df006ff9af79a29f0ffa9c5f21fbe6314a2d
 - name: github.com/getlantern/byteexec
   version: 2e21fedeb225921a8dc40321cbd114ffd0a302f3
 - name: github.com/getlantern/bytemap
@@ -47,11 +47,11 @@ imports:
 - name: github.com/getlantern/vtime
   version: dc1e573cf9918131774034baa8eade77ef901ea3
 - name: github.com/getlantern/wal
-  version: c6fd027cd5b55d7329d426dadc4a8e8000ef7f26
+  version: 65cc618aae913a62438160199f5fd6495083182c
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: 6cf180102dd8e6cc805933a0789d42afb6652bd6
+  version: 9a319a6e0b12fdb31c712bcae0e72a1f28d5293c
   subpackages:
   - bytetree
   - core
@@ -105,7 +105,7 @@ imports:
   - dependency/hack
   - dependency/sqltypes
 - name: golang.org/x/net
-  version: da2b4fa28524a3baf148c1b94df4440267063c88
+  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   repo: https://github.com/golang/net
   vcs: git
   subpackages:
@@ -123,15 +123,8 @@ imports:
   subpackages:
   - unix
   - windows
-- name: golang.org/x/text
-  version: 44f4f658a783b0cee41fe0a23b8fc91d9c120558
-  subpackages:
-  - secure/bidirule
-  - transform
-  - unicode/bidi
-  - unicode/norm
 - name: google.golang.org/appengine
-  version: 8758a385849434ba5eac8aeedcf5192c5a0f5f10
+  version: 9e2ad0873f358c54296ccdc5116b0652c98226d1
   subpackages:
   - datastore
   - internal
@@ -142,7 +135,7 @@ imports:
   - internal/modules
   - internal/remote_api
 - name: google.golang.org/grpc
-  version: 85497e2c516cd289bce5551b840ee27c2a0d6878
+  version: 50955793b0183f9de69bd78e2ec251cf20aab121
   subpackages:
   - codes
   - credentials
@@ -155,7 +148,7 @@ imports:
   - tap
   - transport
 - name: gopkg.in/redis.v5
-  version: b9cc17bae020d9c1f467ca0f27d7706c1683c370
+  version: 6da05abbaa03e90e5878f0ab711478698609fe96
   subpackages:
   - internal
   - internal/consistenthash
