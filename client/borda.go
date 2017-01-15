@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/getlantern/errors"
 	"github.com/getlantern/golog"
+	"github.com/getlantern/zenodb/rpc"
 	"github.com/oxtoacart/bpool"
 )
 
@@ -46,6 +48,8 @@ type Measurement struct {
 	//            "cpu_user": 36.6,
 	//            "connected_to_internet": true }
 	Dimensions json.RawMessage `json:"dimensions,omitempty"`
+
+	dimensions map[string]interface{}
 }
 
 // Options provides configuration options for borda clients
@@ -53,19 +57,23 @@ type Options struct {
 	// BatchInterval specifies how frequent to report to borda
 	BatchInterval time.Duration
 
-	// Client used to report to Borda
-	Client *http.Client
+	// HTTP Client used to report to Borda
+	HTTPClient *http.Client
+
+	// RPC Client used to report to Borda
+	RPCClient rpc.Client
 }
 
 // Submitter is a functon that submits measurements to borda. If the measurement
 // was successfully queued for submission, this returns nil.
 type Submitter func(values map[string]Val, dimensions map[string]interface{}) error
 
-type submitter func(key string, ts time.Time, values map[string]Val, jsonDimensions []byte) error
+type submitter func(key string, ts time.Time, values map[string]Val, dimensions map[string]interface{}, jsonDimensions []byte) error
 
 // Client is a client that submits measurements to the borda server.
 type Client struct {
-	c            *http.Client
+	hc           *http.Client
+	rc           rpc.Client
 	options      *Options
 	buffers      map[int]map[string]*Measurement
 	submitters   map[int]submitter
@@ -82,8 +90,9 @@ func NewClient(opts *Options) *Client {
 		log.Debugf("BatchInterval has to be greater than zero, defaulting to 5 minutes")
 		opts.BatchInterval = 5 * time.Minute
 	}
-	if opts.Client == nil {
-		opts.Client = &http.Client{
+	if opts.HTTPClient == nil && opts.RPCClient == nil {
+		// Default to HTTPClient
+		opts.HTTPClient = &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
 					ClientSessionCache: tls.NewLRUClientSessionCache(100),
@@ -93,7 +102,8 @@ func NewClient(opts *Options) *Client {
 	}
 
 	b := &Client{
-		c:          opts.Client,
+		hc:         opts.HTTPClient,
+		rc:         opts.RPCClient,
 		options:    opts,
 		buffers:    make(map[int]map[string]*Measurement),
 		submitters: make(map[int]submitter),
@@ -116,7 +126,7 @@ func (c *Client) ReducingSubmitter(name string, maxBufferSize int) Submitter {
 	defer c.mx.Unlock()
 	bufferID := c.nextBufferID
 	c.nextBufferID++
-	submitter := func(key string, ts time.Time, values map[string]Val, jsonDimensions []byte) error {
+	submitter := func(key string, ts time.Time, values map[string]Val, dimensions map[string]interface{}, jsonDimensions []byte) error {
 		buffer := c.buffers[bufferID]
 		if buffer == nil {
 			// Lazily initialize buffer
@@ -139,6 +149,7 @@ func (c *Client) ReducingSubmitter(name string, maxBufferSize int) Submitter {
 				Ts:         ts,
 				Values:     values,
 				Dimensions: jsonDimensions,
+				dimensions: dimensions,
 			}
 		}
 		return nil
@@ -152,7 +163,7 @@ func (c *Client) ReducingSubmitter(name string, maxBufferSize int) Submitter {
 		}
 		key := string(jsonDimensions)
 		c.mx.Lock()
-		err := submitter(key, time.Now(), values, jsonDimensions)
+		err := submitter(key, time.Now(), values, dimensions, jsonDimensions)
 		c.mx.Unlock()
 		return err
 	}
@@ -184,10 +195,10 @@ func (c *Client) Flush() {
 	}
 
 	// Make batch
-	batch := make([]*Measurement, 0, numMeasurements)
+	batch := make(map[string][]*Measurement)
 	for _, buffer := range currentBuffers {
-		for _, m := range buffer {
-			batch = append(batch, m)
+		for name, m := range buffer {
+			batch[name] = append(batch[name], m)
 		}
 	}
 
@@ -198,18 +209,20 @@ func (c *Client) Flush() {
 		return
 	}
 	log.Error(err)
-	log.Debugf("Rebuffering %d measurements", numMeasurements)
-	c.mx.Lock()
-	for bufferID, buffer := range currentBuffers {
-		submitter := c.submitters[bufferID]
-		for key, m := range buffer {
-			submitter(key, m.Ts, m.Values, m.Dimensions)
-		}
-	}
-	c.mx.Unlock()
 }
 
-func (c *Client) doSendBatch(batch []*Measurement) error {
+func (c *Client) doSendBatch(batch map[string][]*Measurement) error {
+	if c.rc != nil {
+		return c.doSentBatchRPC(batch)
+	}
+	return c.doSendBatchHTTP(batch)
+}
+
+func (c *Client) doSendBatchHTTP(batchByName map[string][]*Measurement) error {
+	var batch []*Measurement
+	for _, measurements := range batchByName {
+		batch = append(batch, measurements...)
+	}
 	buf := bufferPool.Get()
 	defer bufferPool.Put(buf)
 	err := json.NewEncoder(buf).Encode(batch)
@@ -223,7 +236,7 @@ func (c *Client) doSendBatch(batch []*Measurement) error {
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := c.c.Do(req)
+	resp, err := c.hc.Do(req)
 	if err != nil {
 		return err
 	}
@@ -237,9 +250,30 @@ func (c *Client) doSendBatch(batch []*Measurement) error {
 		if err != nil {
 			return fmt.Errorf("Borda replied with 400, but error message couldn't be read: %v", err)
 		}
-		err = fmt.Errorf("Borda replied with the error: %v", string(errorMsg))
-		return err
+		return fmt.Errorf("Borda replied with the error: %v", string(errorMsg))
 	default:
 		return fmt.Errorf("Borda replied with error %d", resp.StatusCode)
 	}
+}
+
+func (c *Client) doSentBatchRPC(batch map[string][]*Measurement) error {
+	for name, measurements := range batch {
+		inserter, err := c.rc.NewInserter(context.Background(), name)
+		if err != nil {
+			return fmt.Errorf("Unable to get inserter: %v", err)
+		}
+		for _, m := range measurements {
+			inserter.Insert(m.Ts, m.dimensions, func(cb func(string, interface{})) {
+				for key, val := range m.Values {
+					cb(key, val.Get())
+				}
+			})
+		}
+		err = inserter.Close()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
