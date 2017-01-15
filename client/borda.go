@@ -202,7 +202,7 @@ func (c *Client) Flush() {
 		}
 	}
 
-	log.Debugf("Attempting to report %d measurements to Borda", len(batch))
+	log.Debugf("Attempting to report %d measurements to Borda", numMeasurements)
 	err := c.doSendBatch(batch)
 	if err == nil {
 		log.Debugf("Sent %d measurements", len(batch))
@@ -213,8 +213,10 @@ func (c *Client) Flush() {
 
 func (c *Client) doSendBatch(batch map[string][]*Measurement) error {
 	if c.rc != nil {
+		log.Debug("Sending batch with RPC")
 		return c.doSentBatchRPC(batch)
 	}
+	log.Debug("Sending batch with HTTP")
 	return c.doSendBatchHTTP(batch)
 }
 
