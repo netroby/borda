@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	log = golog.LoggerFor("borda")
+	log = golog.LoggerFor("borda.client")
 
 	bordaURL = "https://borda.getlantern.org/measurements"
 
@@ -197,85 +197,94 @@ func (c *Client) Flush() {
 	// Make batch
 	batch := make(map[string][]*Measurement)
 	for _, buffer := range currentBuffers {
-		for name, m := range buffer {
+		for _, m := range buffer {
+			name := m.Name
 			batch[name] = append(batch[name], m)
 		}
 	}
 
 	log.Debugf("Attempting to report %d measurements to Borda", numMeasurements)
-	err := c.doSendBatch(batch)
-	if err == nil {
-		log.Debugf("Sent %d measurements", len(batch))
-		return
+	numInserted, err := c.doSendBatch(batch)
+	log.Debugf("Sent %d measurements", numInserted)
+	if err != nil {
+		log.Errorf("Error sending batch: %v", err)
 	}
-	log.Error(err)
 }
 
-func (c *Client) doSendBatch(batch map[string][]*Measurement) error {
+func (c *Client) doSendBatch(batch map[string][]*Measurement) (int, error) {
 	if c.rc != nil {
 		log.Debug("Sending batch with RPC")
-		return c.doSentBatchRPC(batch)
+		return c.doSendBatchRPC(batch)
 	}
 	log.Debug("Sending batch with HTTP")
 	return c.doSendBatchHTTP(batch)
 }
 
-func (c *Client) doSendBatchHTTP(batchByName map[string][]*Measurement) error {
+func (c *Client) doSendBatchHTTP(batchByName map[string][]*Measurement) (int, error) {
+	numInserted := 0
 	var batch []*Measurement
 	for _, measurements := range batchByName {
+		numInserted += len(measurements)
 		batch = append(batch, measurements...)
 	}
 	buf := bufferPool.Get()
 	defer bufferPool.Put(buf)
 	err := json.NewEncoder(buf).Encode(batch)
 	if err != nil {
-		return log.Errorf("Unable to report measurements: %v", err)
+		return 0, log.Errorf("Unable to report measurements: %v", err)
 	}
 
 	req, decErr := http.NewRequest(http.MethodPost, bordaURL, buf)
 	if decErr != nil {
-		return err
+		return 0, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.hc.Do(req)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer resp.Body.Close()
 
 	switch resp.StatusCode {
 	case 201:
-		return nil
+		return numInserted, nil
 	case 400:
 		errorMsg, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return fmt.Errorf("Borda replied with 400, but error message couldn't be read: %v", err)
+			return 0, fmt.Errorf("Borda replied with 400, but error message couldn't be read: %v", err)
 		}
-		return fmt.Errorf("Borda replied with the error: %v", string(errorMsg))
+		return 0, fmt.Errorf("Borda replied with the error: %v", string(errorMsg))
 	default:
-		return fmt.Errorf("Borda replied with error %d", resp.StatusCode)
+		return 0, fmt.Errorf("Borda replied with error %d", resp.StatusCode)
 	}
 }
 
-func (c *Client) doSentBatchRPC(batch map[string][]*Measurement) error {
-	for name, measurements := range batch {
-		inserter, err := c.rc.NewInserter(context.Background(), name)
+func (c *Client) doSendBatchRPC(batch map[string][]*Measurement) (int, error) {
+	numInserted := 0
+	for _, measurements := range batch {
+		// TODO: right now we send everything to "inbound", might be nice to
+		// separate streams where we can.
+		inserter, err := c.rc.NewInserter(context.Background(), "inbound")
 		if err != nil {
-			return fmt.Errorf("Unable to get inserter: %v", err)
+			return numInserted, fmt.Errorf("Unable to get inserter: %v", err)
 		}
 		for _, m := range measurements {
-			inserter.Insert(m.Ts, m.dimensions, func(cb func(string, interface{})) {
+			err = inserter.Insert(m.Ts, m.dimensions, func(cb func(string, interface{})) {
 				for key, val := range m.Values {
 					cb(key, val.Get())
 				}
 			})
+			if err != nil {
+				inserter.Close()
+				return numInserted, fmt.Errorf("Error inserting: %v", err)
+			}
 		}
-		err = inserter.Close()
+		report, err := inserter.Close()
 		if err != nil {
-			return err
+			return numInserted, fmt.Errorf("Error closing inserter: %v", err)
 		}
+		numInserted += report.Succeeded
 	}
-
-	return nil
+	return numInserted, nil
 }
