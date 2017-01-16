@@ -1,5 +1,5 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-01-14T13:41:38.131962131-06:00
+updated: 2017-01-16T10:05:54.199362018-06:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
@@ -8,7 +8,7 @@ imports:
 - name: github.com/getlantern/byteexec
   version: 2e21fedeb225921a8dc40321cbd114ffd0a302f3
 - name: github.com/getlantern/bytemap
-  version: 944b495c4d5674a38002950686e4dde6c8d0c0f0
+  version: 4dd4ecae18588644add452f16e5c5aa41a90bd00
 - name: github.com/getlantern/context
   version: 624d99b1798d7c5375ea1d3ca4c5b04d58f7c775
 - name: github.com/getlantern/errors
@@ -51,7 +51,7 @@ imports:
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: 9a319a6e0b12fdb31c712bcae0e72a1f28d5293c
+  version: bc4a757d7df7115992badcab51ecedf8afd00b1a
   subpackages:
   - bytetree
   - core
@@ -148,7 +148,7 @@ imports:
   - tap
   - transport
 - name: gopkg.in/redis.v5
-  version: 6da05abbaa03e90e5878f0ab711478698609fe96
+  version: 8829ddcd8bdb333e477cc845946c4b9b2ef66280
   subpackages:
   - internal
   - internal/consistenthash
