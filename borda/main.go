@@ -6,6 +6,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"time"
 
 	"github.com/getlantern/borda"
 	"github.com/getlantern/golog"
@@ -112,7 +113,13 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("Unable to configure web: %v", err))
 	}
-	serverErr := http.Serve(hl, router)
+	hs := &http.Server{
+		Handler:        router,
+		ReadTimeout:    1 * time.Minute,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 19,
+	}
+	serverErr := hs.Serve(hl)
 	if serverErr != nil {
 		log.Fatalf("Error serving HTTPS: %v", serverErr)
 	}
