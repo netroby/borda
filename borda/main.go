@@ -12,7 +12,7 @@ import (
 	"github.com/getlantern/golog"
 	gredis "github.com/getlantern/redis"
 	"github.com/getlantern/tlsdefaults"
-	"github.com/getlantern/zenodb/rpc"
+	"github.com/getlantern/zenodb/rpc/server"
 	"github.com/getlantern/zenodb/web"
 	"github.com/gorilla/mux"
 	"github.com/vharitonsky/iniflags"
@@ -91,7 +91,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Unable to listen at cliaddr %v: %v", *cliaddr, err)
 		}
-		go rpc.Serve(db, cl, &rpc.ServerOpts{
+		go rpcserver.Serve(db, cl, &rpcserver.Opts{
 			Password: *password,
 		})
 	}
