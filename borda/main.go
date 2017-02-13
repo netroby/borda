@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"net/http"
@@ -11,11 +12,11 @@ import (
 	"github.com/getlantern/borda"
 	"github.com/getlantern/golog"
 	gredis "github.com/getlantern/redis"
-	"github.com/getlantern/tlsdefaults"
 	"github.com/getlantern/zenodb/rpc/server"
 	"github.com/getlantern/zenodb/web"
 	"github.com/gorilla/mux"
 	"github.com/vharitonsky/iniflags"
+	"golang.org/x/crypto/acme/autocert"
 	"gopkg.in/redis.v5"
 )
 
@@ -26,8 +27,6 @@ var (
 	httpsaddr          = flag.String("httpsaddr", ":443", "The address at which to listen for HTTPS connections")
 	cliaddr            = flag.String("cliaddr", "localhost:17712", "The address at which to listen for gRPC cli connections, defaults to localhost:17712")
 	pprofAddr          = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
-	pkfile             = flag.String("pkfile", "pk.pem", "Path to the private key PEM file")
-	certfile           = flag.String("certfile", "cert.pem", "Path to the certificate PEM file")
 	cookieHashKey      = flag.String("cookiehashkey", "9Cb7CqeP3PVSQv7nq6B9XUaQmjXeA4RUHQctywefW7gu9fmc4wSPY7AVzhA9497H", "key to use for HMAC authentication of web auth cookies, should be 64 bytes, defaults to random 64 bytes if not specified")
 	cookieBlockKey     = flag.String("cookieblockkey", "BtRxmTBveQUcX8ZYdfnrCN2mUB7z2juP", "key to use for encrypting web auth cookies, should be 32 bytes, defaults to random 32 bytes if not specified")
 	oauthClientID      = flag.String("oauthclientid", "2780eb96d3834a26ebc2", "id to use for oauth client to connect to GitHub")
@@ -80,14 +79,23 @@ func main() {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
 
-	hl, err := tlsdefaults.Listen(*httpsaddr, *pkfile, *certfile)
+	m := autocert.Manager{
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: autocert.HostWhitelist("borda.getlantern.org"),
+		Cache:      autocert.DirCache("certs"),
+		Email:      "admin@getlantern.org",
+	}
+	tlsConfig := &tls.Config{
+		GetCertificate: m.GetCertificate,
+	}
+	hl, err := tls.Listen("tcp", *httpsaddr, tlsConfig)
 	if err != nil {
 		log.Fatalf("Unable to listen HTTPS: %v", err)
 	}
 	fmt.Fprintf(os.Stdout, "Listening for HTTPS connections at %v\n", hl.Addr())
 
 	if *cliaddr != "" {
-		cl, err := tlsdefaults.Listen(*cliaddr, *pkfile, *certfile)
+		cl, err := tls.Listen("tcp", *cliaddr, tlsConfig)
 		if err != nil {
 			log.Fatalf("Unable to listen at cliaddr %v: %v", *cliaddr, err)
 		}
