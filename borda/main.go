@@ -81,7 +81,7 @@ func main() {
 
 	m := autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist("borda.getlantern.org"),
+		HostPolicy: autocert.HostWhitelist("borda.getlantern.org", "d157vud77ygy87.cloudfront.net"),
 		Cache:      autocert.DirCache("certs"),
 		Email:      "admin@getlantern.org",
 	}
