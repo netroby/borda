@@ -17,6 +17,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/vharitonsky/iniflags"
 	"golang.org/x/crypto/acme/autocert"
+	"golang.org/x/net/context"
 	"gopkg.in/redis.v5"
 )
 
@@ -80,13 +81,24 @@ func main() {
 	}
 
 	m := autocert.Manager{
-		Prompt:     autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist("borda.getlantern.org", "d157vud77ygy87.cloudfront.net"),
-		Cache:      autocert.DirCache("certs"),
-		Email:      "admin@getlantern.org",
+		Prompt: autocert.AcceptTOS,
+		HostPolicy: func(_ context.Context, host string) error {
+			// Support any host
+			return nil
+		},
+		Cache: autocert.DirCache("certs"),
+		Email: "admin@getlantern.org",
 	}
 	tlsConfig := &tls.Config{
-		GetCertificate: m.GetCertificate,
+		GetCertificate: func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			origServerName := hello.ServerName
+			// Always make it look like client requested a borda.getlantern.org cert
+			hello.ServerName = "borda.getlantern.org"
+			cert, certErr := m.GetCertificate(hello)
+			hello.ServerName = origServerName
+			return cert, certErr
+		},
+		PreferServerCipherSuites: true,
 	}
 	hl, err := tls.Listen("tcp", *httpsaddr, tlsConfig)
 	if err != nil {
@@ -95,9 +107,9 @@ func main() {
 	fmt.Fprintf(os.Stdout, "Listening for HTTPS connections at %v\n", hl.Addr())
 
 	if *cliaddr != "" {
-		cl, err := tls.Listen("tcp", *cliaddr, tlsConfig)
-		if err != nil {
-			log.Fatalf("Unable to listen at cliaddr %v: %v", *cliaddr, err)
+		cl, listenErr := tls.Listen("tcp", *cliaddr, tlsConfig)
+		if listenErr != nil {
+			log.Fatalf("Unable to listen at cliaddr %v: %v", *cliaddr, listenErr)
 		}
 		go rpcserver.Serve(db, cl, &rpcserver.Opts{
 			Password: *password,
