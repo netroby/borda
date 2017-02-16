@@ -86,14 +86,19 @@ func main() {
 			// Support any host
 			return nil
 		},
-		Cache: autocert.DirCache("certs"),
-		Email: "admin@getlantern.org",
+		Cache:    autocert.DirCache("certs"),
+		Email:    "admin@getlantern.org",
+		ForceRSA: true, // we need to force RSA keys because CloudFront doesn't like our ECDSA cipher suites
 	}
 	tlsConfig := &tls.Config{
 		GetCertificate: func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 			origServerName := hello.ServerName
-			// Always make it look like client requested a borda.getlantern.org cert
-			hello.ServerName = "borda.getlantern.org"
+			if origServerName == "d157vud77ygy87.cloudfront.net" || origServerName == "" {
+				// Return the borda.getlantern.org cert for domain-fronted requests or requests without SNI
+				hello.ServerName = "borda.getlantern.org"
+			} else if origServerName != "borda.getlantern.org" {
+				log.Debugf("Unexpected server name: %v", origServerName)
+			}
 			cert, certErr := m.GetCertificate(hello)
 			hello.ServerName = origServerName
 			return cert, certErr
