@@ -1,5 +1,5 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-01-16T10:05:54.199362018-06:00
+updated: 2017-02-19T16:28:57.034045679-06:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
@@ -42,35 +42,35 @@ imports:
   version: 813d09d4d8b3d70f253bc5b84bbb86e9407d8f04
 - name: github.com/getlantern/stack
   version: 02f928aad224fbccd50d66edd776fc9d1e9f2f2b
-- name: github.com/getlantern/tlsdefaults
-  version: f047fcda194525bddaa2d26da43c1b5400aaed6c
 - name: github.com/getlantern/vtime
   version: dc1e573cf9918131774034baa8eade77ef901ea3
 - name: github.com/getlantern/wal
-  version: 65cc618aae913a62438160199f5fd6495083182c
+  version: 94824e5b616c1fbf3f47442aecde31e38f317c3a
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: bc4a757d7df7115992badcab51ecedf8afd00b1a
+  version: a88d9276b4934dbaaaccc9c32bb0cfd26edce99e
   subpackages:
   - bytetree
+  - common
   - core
   - encoding
   - expr
   - planner
   - rpc
+  - rpc/server
   - sql
   - web
 - name: github.com/golang/protobuf
-  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
+  version: 69b215d01a5606c843240eab4937eab3acee6530
   subpackages:
   - proto
 - name: github.com/golang/snappy
-  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+  version: 553a641470496b2327abcac10b36396bd98e45c9
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: 757bef944d0f21880861c2dd9c871ca543023cba
+  version: 94e7d24fd285520f3d12ae998f7fdd6b5393d453
 - name: github.com/gorilla/securecookie
   version: fa5329f913702981df43dcb2a380bac429c810b5
 - name: github.com/hashicorp/golang-lru
@@ -78,7 +78,7 @@ imports:
   subpackages:
   - simplelru
 - name: github.com/oschwald/geoip2-golang
-  version: 496a3cbcb65a3cb54497fe4ae2273319e85160a4
+  version: be604c4d64628a31fd5cdd1a20752632252807bc
 - name: github.com/oschwald/maxminddb-golang
   version: 4cf6490e82edd288b91d6a786d85dab042015e24
 - name: github.com/oxtoacart/bpool
@@ -92,7 +92,7 @@ imports:
 - name: github.com/spaolacci/murmur3
   version: 0d12bf811670bf6a1a63828dfbd003eded177fce
 - name: github.com/stretchr/testify
-  version: 2402e8e7a02fc811447d11f881aa9746cdc57983
+  version: 4d4bfba8f1d1027c4fdbe371823030df51419987
   subpackages:
   - assert
 - name: github.com/vharitonsky/iniflags
@@ -104,12 +104,18 @@ imports:
   - dependency/bytes2
   - dependency/hack
   - dependency/sqltypes
+- name: golang.org/x/crypto
+  version: 453249f01cfeb54c3d549ddb75ff152ca243f9d8
+  subpackages:
+  - acme
+  - acme/autocert
 - name: golang.org/x/net
-  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
+  version: 6b27048ae5e6ad1ef927e72e437531493de612fe
   repo: https://github.com/golang/net
   vcs: git
   subpackages:
   - context
+  - context/ctxhttp
   - http2
   - http2/hpack
   - idna
@@ -117,14 +123,14 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
+  version: 075e574b89e4c2d22f2286a7e2b919519c6f3547
   repo: https://github.com/golang/sys
   vcs: git
   subpackages:
   - unix
   - windows
 - name: google.golang.org/appengine
-  version: 9e2ad0873f358c54296ccdc5116b0652c98226d1
+  version: 2e4a801b39fc199db615bfca7d0b9f8cd9580599
   subpackages:
   - datastore
   - internal
@@ -135,7 +141,7 @@ imports:
   - internal/modules
   - internal/remote_api
 - name: google.golang.org/grpc
-  version: 50955793b0183f9de69bd78e2ec251cf20aab121
+  version: d0c32ee6a441117d49856d6120ca9552af413ee0
   subpackages:
   - codes
   - credentials
@@ -148,7 +154,7 @@ imports:
   - tap
   - transport
 - name: gopkg.in/redis.v5
-  version: 8829ddcd8bdb333e477cc845946c4b9b2ef66280
+  version: 135cb12c7689ffe92338baf677a1e0d2086144dc
   subpackages:
   - internal
   - internal/consistenthash
