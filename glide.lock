@@ -1,10 +1,10 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-02-24T21:22:26.186746754-06:00
+updated: 2017-03-21T11:27:35.267164797-05:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
 - name: github.com/dustin/go-humanize
-  version: 7a41df006ff9af79a29f0ffa9c5f21fbe6314a2d
+  version: 259d2a102b871d17f30e3cd9881a642961a1e486
 - name: github.com/getlantern/byteexec
   version: 2e21fedeb225921a8dc40321cbd114ffd0a302f3
 - name: github.com/getlantern/bytemap
@@ -18,7 +18,7 @@ imports:
 - name: github.com/getlantern/filepersist
   version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
 - name: github.com/getlantern/goexpr
-  version: c91d949be13cfb774cc8b2831c603fbff116cba0
+  version: d6b8955ca03d23c95e2954f9a9211e9284454d0f
   subpackages:
   - geo
   - isp
@@ -45,11 +45,11 @@ imports:
 - name: github.com/getlantern/vtime
   version: dc1e573cf9918131774034baa8eade77ef901ea3
 - name: github.com/getlantern/wal
-  version: 94824e5b616c1fbf3f47442aecde31e38f317c3a
+  version: b17dbdbead93a94e64755a23855663cd8ff194d5
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: 9be63000db8e9151f5b0700a5e4f27c3a84f1b86
+  version: f8aa8604c486255f2a24408ba6c716ddee9823bf
   subpackages:
   - bytetree
   - common
@@ -66,7 +66,7 @@ imports:
   subpackages:
   - oleutil
 - name: github.com/golang/protobuf
-  version: 69b215d01a5606c843240eab4937eab3acee6530
+  version: c9c7427a2a70d2eb3bafa0ab2dc163e45f143317
   subpackages:
   - proto
 - name: github.com/golang/snappy
@@ -74,7 +74,7 @@ imports:
 - name: github.com/gorilla/context
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
-  version: 999ef73f5d50979cf6d12afed1726325b63f9570
+  version: 599cba5e7b6137d46ddf58fb1765f5d928e69604
 - name: github.com/gorilla/securecookie
   version: e59506cc896acb7f7bf732d4fdf5e25f7ccd8983
 - name: github.com/hashicorp/golang-lru
@@ -82,7 +82,7 @@ imports:
   subpackages:
   - simplelru
 - name: github.com/oschwald/geoip2-golang
-  version: 706a710ce5129fb81dadba750aa80d53ca7ba2ca
+  version: 0fd242da7906550802871efe101abfdb1cc550a8
 - name: github.com/oschwald/maxminddb-golang
   version: 697da8075d2061aa8ed639346443f5d3e8c80b30
 - name: github.com/oxtoacart/bpool
@@ -90,11 +90,11 @@ imports:
 - name: github.com/oxtoacart/emsort
   version: e467347e335434365584bc76ce22b8d23190da6e
 - name: github.com/retailnext/hllpp
-  version: 38a7bb71b483e855d35010808143beaf05b67f9d
+  version: 9fdfea05b3e55bebe7beb22d16c7db15d46cd518
 - name: github.com/rickar/props
   version: c68a002e87c1dca1be6eebaf289dfe56db65c87e
 - name: github.com/shirou/gopsutil
-  version: d371ba1293cb48fedc6850526ea48b3846c54f2c
+  version: 423a8ff2a6da39265b3d05d36ca7e3f18fc8d733
   subpackages:
   - cpu
   - host
@@ -107,7 +107,7 @@ imports:
 - name: github.com/spaolacci/murmur3
   version: 0d12bf811670bf6a1a63828dfbd003eded177fce
 - name: github.com/StackExchange/wmi
-  version: e542ed97d15e640bdc14b5c12162d59e8fc67324
+  version: 9f32b5905fd6ce7384093f9d048437e79f7b4d85
 - name: github.com/stretchr/testify
   version: 4d4bfba8f1d1027c4fdbe371823030df51419987
   subpackages:
@@ -122,12 +122,12 @@ imports:
   - dependency/hack
   - dependency/sqltypes
 - name: golang.org/x/crypto
-  version: 453249f01cfeb54c3d549ddb75ff152ca243f9d8
+  version: 459e26527287adbc2adcc5d0d49abff9a5f315a7
   subpackages:
   - acme
   - acme/autocert
 - name: golang.org/x/net
-  version: 10c134ea0df15f7e34d789338c7a2d76cc7a3ab9
+  version: a6577fac2d73be281a500b310739095313165611
   repo: https://github.com/golang/net
   vcs: git
   subpackages:
@@ -140,14 +140,14 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: e4594059fe4cde2daf423055a596c2cd1e6c9adf
+  version: 99f16d856c9836c42d24e7ab64ea72916925fa97
   repo: https://github.com/golang/sys
   vcs: git
   subpackages:
   - unix
   - windows
 - name: google.golang.org/appengine
-  version: 3a452f9e00122ead39586d68ffdb9c6e1326af3c
+  version: b79c28f0197795b4050bfcd7c4c2209136c594b1
   subpackages:
   - datastore
   - internal
@@ -158,12 +158,13 @@ imports:
   - internal/modules
   - internal/remote_api
 - name: google.golang.org/grpc
-  version: 34384f34de585705f1a6783a158d2ec8af29f618
+  version: cdee119ee21e61eef7093a41ba148fa83585e143
   subpackages:
   - codes
   - credentials
   - grpclog
   - internal
+  - keepalive
   - metadata
   - naming
   - peer
@@ -171,7 +172,7 @@ imports:
   - tap
   - transport
 - name: gopkg.in/redis.v5
-  version: cbad034630445e15fbcaa7e9904064dd67bce69b
+  version: a16aeec10ff407b1e7be6dd35797ccf5426ef0f0
   subpackages:
   - internal
   - internal/consistenthash
@@ -179,7 +180,7 @@ imports:
   - internal/pool
   - internal/proto
 - name: gopkg.in/vmihailenco/msgpack.v2
-  version: a1382b1ce0c749733b814157c245e02cc1f41076
+  version: f784471e11a864303cc098fe5c48af8e79628f3e
   subpackages:
   - codes
 testImports:
