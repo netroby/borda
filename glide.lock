@@ -1,5 +1,5 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-03-29T11:49:02.380183487-05:00
+updated: 2017-03-29T12:20:06.937654746-05:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
@@ -49,7 +49,7 @@ imports:
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: 4fbd41d3b981e5646cef74020e954e3951026123
+  version: afc39c88624e7a3842ce7dd59a827ce597717fbc
   subpackages:
   - bytetree
   - common
@@ -127,7 +127,7 @@ imports:
   - acme
   - acme/autocert
 - name: golang.org/x/net
-  version: 05d3205156cb1bdc096578d6457fa161cd950aa2
+  version: ffcf1bedda3b04ebb15a168a59800a73d6dc0f4d
   repo: https://github.com/golang/net
   vcs: git
   subpackages:
