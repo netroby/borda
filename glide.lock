@@ -1,5 +1,5 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-03-21T11:27:35.267164797-05:00
+updated: 2017-03-29T10:52:55.230944704-05:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
@@ -8,7 +8,7 @@ imports:
 - name: github.com/getlantern/byteexec
   version: 2e21fedeb225921a8dc40321cbd114ffd0a302f3
 - name: github.com/getlantern/bytemap
-  version: 4dd4ecae18588644add452f16e5c5aa41a90bd00
+  version: 807aefefeb0978ae9572ddfe7ec99b68f3da03e2
 - name: github.com/getlantern/context
   version: 624d99b1798d7c5375ea1d3ca4c5b04d58f7c775
 - name: github.com/getlantern/errors
@@ -18,7 +18,7 @@ imports:
 - name: github.com/getlantern/filepersist
   version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
 - name: github.com/getlantern/goexpr
-  version: d6b8955ca03d23c95e2954f9a9211e9284454d0f
+  version: 5d0d42bc7cb5cb4c2bdfb4a33e8447865ec715ec
   subpackages:
   - geo
   - isp
@@ -49,7 +49,7 @@ imports:
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: f8aa8604c486255f2a24408ba6c716ddee9823bf
+  version: f38775e49ab4547e9a8d671b25727952de7ec733
   subpackages:
   - bytetree
   - common
@@ -94,7 +94,7 @@ imports:
 - name: github.com/rickar/props
   version: c68a002e87c1dca1be6eebaf289dfe56db65c87e
 - name: github.com/shirou/gopsutil
-  version: 423a8ff2a6da39265b3d05d36ca7e3f18fc8d733
+  version: 3499dec5c013d054d5d2a99ec48345998034e841
   subpackages:
   - cpu
   - host
@@ -115,7 +115,7 @@ imports:
 - name: github.com/vharitonsky/iniflags
   version: 94db042d45d83a94a8cfc494a6800ce1b5edd5e4
 - name: github.com/xwb1989/sqlparser
-  version: dbfc8580724c42e86a20e9586b75a65b806cd88b
+  version: a9cdf22bd561e715bba34ee228cb1c06bfa2719c
   subpackages:
   - dependency/bson
   - dependency/bytes2
@@ -127,7 +127,7 @@ imports:
   - acme
   - acme/autocert
 - name: golang.org/x/net
-  version: a6577fac2d73be281a500b310739095313165611
+  version: 05d3205156cb1bdc096578d6457fa161cd950aa2
   repo: https://github.com/golang/net
   vcs: git
   subpackages:
@@ -140,14 +140,21 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: 99f16d856c9836c42d24e7ab64ea72916925fa97
+  version: 9a7256cb28ed514b4e1e5f68959914c4c28a92e0
   repo: https://github.com/golang/sys
   vcs: git
   subpackages:
   - unix
   - windows
+- name: golang.org/x/text
+  version: fc7fa097411d30e6708badff276c4c164425590c
+  subpackages:
+  - secure/bidirule
+  - transform
+  - unicode/bidi
+  - unicode/norm
 - name: google.golang.org/appengine
-  version: b79c28f0197795b4050bfcd7c4c2209136c594b1
+  version: 56d253d1dd14aa01937e12c73a0971bcfd797ff2
   subpackages:
   - datastore
   - internal
@@ -158,7 +165,7 @@ imports:
   - internal/modules
   - internal/remote_api
 - name: google.golang.org/grpc
-  version: cdee119ee21e61eef7093a41ba148fa83585e143
+  version: 7fc29d0caa400efc53212b222356f99efe87d7d5
   subpackages:
   - codes
   - credentials
