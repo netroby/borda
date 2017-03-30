@@ -1,5 +1,5 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-03-29T12:20:06.937654746-05:00
+updated: 2017-03-30T14:16:46.081844037-05:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
@@ -49,7 +49,7 @@ imports:
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: afc39c88624e7a3842ce7dd59a827ce597717fbc
+  version: 43387027925f33ba9a0233e3c5b362dd09b125ba
   subpackages:
   - bytetree
   - common
@@ -94,7 +94,7 @@ imports:
 - name: github.com/rickar/props
   version: c68a002e87c1dca1be6eebaf289dfe56db65c87e
 - name: github.com/shirou/gopsutil
-  version: 3499dec5c013d054d5d2a99ec48345998034e841
+  version: f18f7dcbae9dcf766ffefecb4c953cd6aab0bc6d
   subpackages:
   - cpu
   - host
@@ -122,7 +122,7 @@ imports:
   - dependency/hack
   - dependency/sqltypes
 - name: golang.org/x/crypto
-  version: 459e26527287adbc2adcc5d0d49abff9a5f315a7
+  version: 3cb07270c9455e8ad27956a70891c962d121a228
   subpackages:
   - acme
   - acme/autocert
@@ -147,7 +147,7 @@ imports:
   - unix
   - windows
 - name: golang.org/x/text
-  version: fc7fa097411d30e6708badff276c4c164425590c
+  version: 3aa6d803466d99ea1bdf4af99e6db53299c02bd7
   subpackages:
   - secure/bidirule
   - transform
