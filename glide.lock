@@ -115,7 +115,7 @@ imports:
 - name: github.com/vharitonsky/iniflags
   version: 94db042d45d83a94a8cfc494a6800ce1b5edd5e4
 - name: github.com/xwb1989/sqlparser
-  version: a9cdf22bd561e715bba34ee228cb1c06bfa2719c
+  version: 57225f75cf94afde1b3a886b6376c7e5f0aef240
   subpackages:
   - dependency/bson
   - dependency/bytes2
