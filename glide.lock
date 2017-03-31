@@ -1,5 +1,5 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-03-30T14:16:46.081844037-05:00
+updated: 2017-03-31T12:10:24.368445775-05:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
@@ -39,7 +39,7 @@ imports:
 - name: github.com/getlantern/redis
   version: 54bdaa768b91d5b3fb4ef99b4e186aefcae9ec79
 - name: github.com/getlantern/sqlparser
-  version: 813d09d4d8b3d70f253bc5b84bbb86e9407d8f04
+  version: 57225f75cf94afde1b3a886b6376c7e5f0aef240
 - name: github.com/getlantern/stack
   version: 02f928aad224fbccd50d66edd776fc9d1e9f2f2b
 - name: github.com/getlantern/vtime
@@ -66,7 +66,7 @@ imports:
   subpackages:
   - oleutil
 - name: github.com/golang/protobuf
-  version: c9c7427a2a70d2eb3bafa0ab2dc163e45f143317
+  version: 2bba0603135d7d7f5cb73b2125beeda19c09f4ef
   subpackages:
   - proto
 - name: github.com/golang/snappy
@@ -115,7 +115,7 @@ imports:
 - name: github.com/vharitonsky/iniflags
   version: 94db042d45d83a94a8cfc494a6800ce1b5edd5e4
 - name: github.com/xwb1989/sqlparser
-  version: 57225f75cf94afde1b3a886b6376c7e5f0aef240
+  version: a9cdf22bd561e715bba34ee228cb1c06bfa2719c
   subpackages:
   - dependency/bson
   - dependency/bytes2
@@ -147,7 +147,7 @@ imports:
   - unix
   - windows
 - name: golang.org/x/text
-  version: 3aa6d803466d99ea1bdf4af99e6db53299c02bd7
+  version: c3b0cbb40eb9a862fdc91f79bed8c7ac8e7a36e8
   subpackages:
   - secure/bidirule
   - transform
