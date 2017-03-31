@@ -157,6 +157,15 @@ func (c *Client) ReducingSubmitter(name string, maxBufferSize int) Submitter {
 	c.submitters[bufferID] = submitter
 
 	return func(values map[string]Val, dimensions map[string]interface{}) error {
+		// Convert metrics to values
+		for dim, val := range dimensions {
+			metric, ok := val.(Val)
+			if ok {
+				delete(dimensions, dim)
+				values[dim] = metric
+			}
+		}
+
 		jsonDimensions, encodeErr := json.Marshal(dimensions)
 		if encodeErr != nil {
 			return errors.New("Unable to marshal dimensions: %v", encodeErr)
