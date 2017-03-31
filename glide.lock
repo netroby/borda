@@ -1,5 +1,5 @@
 hash: e5926e2ca58ce3ae2ad20d61410aeff3f54573e0d70707d657d20e3cb9df9ad1
-updated: 2017-03-31T13:23:23.694292307-05:00
+updated: 2017-03-31T16:44:08.793716813-05:00
 imports:
 - name: github.com/cloudfoundry/gosigar
   version: dfaa4d491586af21e1ce06028df3926389a99654
@@ -49,7 +49,7 @@ imports:
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: 817671111b51543082c3f4dab5e6166c9fe69a29
+  version: cb374b194780bab45c02079e8c7702f7ac9aa3b1
   subpackages:
   - bytetree
   - common
@@ -165,7 +165,7 @@ imports:
   - internal/modules
   - internal/remote_api
 - name: google.golang.org/grpc
-  version: 7fc29d0caa400efc53212b222356f99efe87d7d5
+  version: b2fae0cf40c13b6741fbcc32a7bfa52fdf5c278d
   subpackages:
   - codes
   - credentials
