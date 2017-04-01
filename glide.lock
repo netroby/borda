@@ -49,7 +49,7 @@ imports:
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: cb374b194780bab45c02079e8c7702f7ac9aa3b1
+  version: 85329c3d59faf5e8bffe01de2126ca8eb09f3fe7
   subpackages:
   - bytetree
   - common
