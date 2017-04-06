@@ -7,6 +7,7 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/getlantern/borda"
@@ -134,6 +135,7 @@ func main() {
 		HashKey:           *cookieHashKey,
 		BlockKey:          *cookieBlockKey,
 		Password:          *password,
+		CacheDir:          filepath.Join(*dbdir, "_webcache"),
 	})
 	if err != nil {
 		panic(fmt.Errorf("Unable to configure web: %v", err))
