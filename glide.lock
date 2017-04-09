@@ -18,7 +18,7 @@ imports:
 - name: github.com/getlantern/filepersist
   version: c5f0cd24e7991579ba6f5f1bd20a1ad2c9f06cd4
 - name: github.com/getlantern/goexpr
-  version: e60477e42660b2c1c764b524cc3b99302cee7f2d
+  version: 5051fcb9bce923ef1e677b388aacce53104c4fdd
   subpackages:
   - geo
   - isp
@@ -49,7 +49,7 @@ imports:
 - name: github.com/getlantern/yaml
   version: 97d86b60f57eeca9d70c02763ed2565bafc17585
 - name: github.com/getlantern/zenodb
-  version: 129a39e6e704d9e11d570cc9346f62a2b3717210
+  version: 5243b359a93f492268b21db8fe53a0fa34b78bc8
   subpackages:
   - bytetree
   - common
