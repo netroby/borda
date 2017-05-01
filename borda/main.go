@@ -46,6 +46,7 @@ var (
 	redisClientPK      = flag.String("redisclientpk", "", "Private key for authenticating client to redis's stunnel")
 	redisClientCert    = flag.String("redisclientcert", "", "Certificate for authenticating client to redis's stunnel")
 	redisCacheSize     = flag.Int("rediscachesize", 25000, "Configures the maximum size of redis caches for HGET operations, defaults to 25,000 per hash")
+	queryTimeout       = flag.Duration("querytimeout", 1*time.Hour, "Configures the timeout for web queries, defaults to 1 hour")
 )
 
 func main() {
@@ -136,6 +137,7 @@ func main() {
 		BlockKey:          *cookieBlockKey,
 		Password:          *password,
 		CacheDir:          filepath.Join(*dbdir, "_webcache"),
+		QueryTimeout:      *queryTimeout,
 	})
 	if err != nil {
 		panic(fmt.Errorf("Unable to configure web: %v", err))
