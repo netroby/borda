@@ -62,6 +62,10 @@ type Options struct {
 
 	// RPC Client used to report to Borda
 	RPCClient rpc.Client
+
+	// BeforeSubmit is an optional callback that gets called before submitting a
+	// batch to borda. The callback should not modify the values and dimensions.
+	BeforeSubmit func(name string, key string, ts time.Time, values map[string]Val, dimensions map[string]interface{})
 }
 
 // Submitter is a functon that submits measurements to borda. If the measurement
@@ -98,6 +102,10 @@ func NewClient(opts *Options) *Client {
 					ClientSessionCache: tls.NewLRUClientSessionCache(100),
 				},
 			},
+		}
+	}
+	if opts.BeforeSubmit == nil {
+		opts.BeforeSubmit = func(name string, key string, ts time.Time, values map[string]Val, dimensions map[string]interface{}) {
 		}
 	}
 
@@ -171,8 +179,10 @@ func (c *Client) ReducingSubmitter(name string, maxBufferSize int) Submitter {
 			return errors.New("Unable to marshal dimensions: %v", encodeErr)
 		}
 		key := string(jsonDimensions)
+		ts := time.Now()
+		c.options.BeforeSubmit(name, key, ts, values, dimensions)
 		c.mx.Lock()
-		err := submitter(key, time.Now(), values, dimensions, jsonDimensions)
+		err := submitter(key, ts, values, dimensions, jsonDimensions)
 		c.mx.Unlock()
 		return err
 	}
