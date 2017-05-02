@@ -30,6 +30,22 @@ func (a Sum) Get() float64 {
 	return float64(a)
 }
 
+// Float is an alias for Sum, it is deprecated, using Sum instead
+type Float Sum
+
+func (a Float) Merge(b Val) Val {
+	if b == nil {
+		return a
+	}
+	i := a.Get()
+	ii := b.Get()
+	return Sum(i + ii)
+}
+
+func (a Float) Get() float64 {
+	return float64(a)
+}
+
 // Min is a float value that gets reduced by taking the lowest value.
 type Min float64
 

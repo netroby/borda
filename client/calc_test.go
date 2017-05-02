@@ -6,7 +6,7 @@ import (
 )
 
 func TestSum(t *testing.T) {
-	assert.Equal(t, 1.0, Sum(-1).Merge(Sum(2)).Merge(Sum(0)).Merge(nil).Get())
+	assert.Equal(t, 1.0, Sum(-1).Merge(Sum(2)).Merge(Float(0)).Merge(nil).Get())
 }
 
 func TestMin(t *testing.T) {
