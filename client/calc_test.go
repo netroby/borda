@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func TestFloat(t *testing.T) {
-	assert.Equal(t, 1.0, Float(-1).Merge(Float(2)).Merge(Float(0)).Merge(nil).Get())
+func TestSum(t *testing.T) {
+	assert.Equal(t, 1.0, Sum(-1).Merge(Sum(2)).Merge(Sum(0)).Merge(nil).Get())
 }
 
 func TestMin(t *testing.T) {
@@ -19,8 +19,8 @@ func TestMax(t *testing.T) {
 
 func TestAvg(t *testing.T) {
 	// Note - the subsequent types don't matter
-	a1 := Avg(1).Merge(Float(2))
-	a2 := Avg(10).Merge(Float(20))
+	a1 := Avg(1).Merge(Sum(2))
+	a2 := Avg(10).Merge(Sum(20))
 	assert.Equal(t, 8.25, a1.Merge(a2).Merge(nil).Get())
 }
 

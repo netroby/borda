@@ -31,7 +31,7 @@ func TestBordaClient(t *testing.T) {
 	countOfEachError := 10
 	for i := 0; i < numUniqueErrors*countOfEachError; i++ {
 		values := map[string]Val{
-			"error_count": Float(1),
+			"error_count": Sum(1),
 		}
 		dims := map[string]interface{}{
 			"ca": (i % numUniqueErrors) + 1,
@@ -61,7 +61,7 @@ func TestBordaClient(t *testing.T) {
 
 	// Send another measurement and make sure that gets through too
 	values := map[string]Val{
-		"success_count": Float(1),
+		"success_count": Sum(1),
 		"an_average":    Avg(2),
 	}
 	dims := map[string]interface{}{

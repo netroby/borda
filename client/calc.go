@@ -14,19 +14,19 @@ type Val interface {
 	Merge(b Val) Val
 }
 
-// Float is float value that gets reduced by plain addition.
-type Float float64
+// Sum is float value that gets reduced by plain addition.
+type Sum float64
 
-func (a Float) Merge(b Val) Val {
+func (a Sum) Merge(b Val) Val {
 	if b == nil {
 		return a
 	}
 	i := a.Get()
 	ii := b.Get()
-	return Float(i + ii)
+	return Sum(i + ii)
 }
 
-func (a Float) Get() float64 {
+func (a Sum) Get() float64 {
 	return float64(a)
 }
 
