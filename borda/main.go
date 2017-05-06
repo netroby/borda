@@ -144,7 +144,7 @@ func main() {
 	}
 	hs := &http.Server{
 		Handler:        router,
-		ReadTimeout:    12 * time.Minute, // this should be larger than the timeout on zeno queries (currently 10 minutes)
+		ReadTimeout:    60 * time.Minute, // this should be larger than the timeout on zeno queries (currently 10 minutes)
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 19,
 	}
