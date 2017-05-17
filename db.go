@@ -25,6 +25,7 @@ func TDBSave(dir string, schemaFile string, aliasesFile string, ispdb string, re
 		Dir:                dir,
 		SchemaFile:         schemaFile,
 		AliasesFile:        aliasesFile,
+		EnableGeo:          true,
 		ISPProvider:        ispProvider,
 		RedisClient:        redisClient,
 		RedisCacheSize:     redisCacheSize,
