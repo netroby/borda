@@ -1,9 +1,11 @@
 package main
 
 import (
+	"crypto/rand"
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -106,6 +108,7 @@ func main() {
 			return cert, certErr
 		},
 		PreferServerCipherSuites: true,
+		SessionTicketKey:         getSessionTicketKey(),
 	}
 	hl, err := tls.Listen("tcp", *httpsaddr, tlsConfig)
 	if err != nil {
@@ -144,12 +147,37 @@ func main() {
 	}
 	hs := &http.Server{
 		Handler:        router,
-		ReadTimeout:    60 * time.Minute, // this should be larger than the timeout on zeno queries (currently 10 minutes)
-		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 19,
 	}
 	serverErr := hs.Serve(hl)
 	if serverErr != nil {
 		log.Fatalf("Error serving HTTPS: %v", serverErr)
 	}
+}
+
+// this allows us to reuse a session ticket key across restarts, which avoids
+// excessive TLS renegotiation with old clients.
+func getSessionTicketKey() [32]byte {
+	var key [32]byte
+	keySlice, err := ioutil.ReadFile("session_ticket_key")
+	if err != nil {
+		keySlice = make([]byte, 32)
+		n, err := rand.Read(keySlice)
+		if err != nil {
+			log.Errorf("Unable to generate session ticket key: %v", err)
+			return key
+		}
+		if n != 32 {
+			log.Errorf("Generated unexpected length of random data %d", n)
+			return key
+		}
+		err = ioutil.WriteFile("session_ticket_key", keySlice, 0600)
+		if err != nil {
+			log.Errorf("Unable to save session_ticket_key: %v", err)
+		} else {
+			log.Debug("Saved new session_ticket_key")
+		}
+	}
+	copy(key[:], keySlice)
+	return key
 }
