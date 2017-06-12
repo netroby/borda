@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"sync"
 	"time"
 
 	"github.com/getlantern/errors"
 	"github.com/getlantern/golog"
+	"github.com/getlantern/ops"
 	"github.com/getlantern/zenodb/rpc"
 	"github.com/oxtoacart/bpool"
 )
@@ -119,6 +121,62 @@ func NewClient(opts *Options) *Client {
 
 	go b.sendPeriodically()
 	return b
+}
+
+// DefaultClient creates a new Client that connects to borda.getlantern.org
+// using gRPC if possible, or falling back to HTTPS if it can't dial out with
+// gRPC.
+func DefaultClient(batchInterval time.Duration, maxBufferSize int) *Client {
+	log.Debugf("Creating borda client that submits every %v", batchInterval)
+
+	opts := &Options{
+		BatchInterval: batchInterval,
+	}
+
+	clientSessionCache := tls.NewLRUClientSessionCache(10000)
+	clientTLSConfig := &tls.Config{
+		ServerName:         "borda.getlantern.org",
+		ClientSessionCache: clientSessionCache,
+	}
+
+	rc, err := rpc.Dial("borda.getlantern.org:17712", &rpc.ClientOpts{
+		Dialer: func(addr string, timeout time.Duration) (net.Conn, error) {
+			conn, dialErr := net.DialTimeout("tcp", addr, timeout)
+			if dialErr != nil {
+				return nil, dialErr
+			}
+			tlsConn := tls.Client(conn, clientTLSConfig)
+			return tlsConn, tlsConn.Handshake()
+		},
+	})
+	if err != nil {
+		log.Errorf("Unable to dial borda, will not use gRPC: %v", err)
+	} else {
+		log.Debug("Using gRPC to communicate with borda")
+		opts.RPCClient = rc
+	}
+
+	return NewClient(opts)
+}
+
+// EnableOpsReporting registers a reporter with the ops package that reports op
+// successes and failures to borda under the given measurement name.
+func (c *Client) EnableOpsReporting(name string, maxBufferSize int) {
+	reportToBorda := c.ReducingSubmitter(name, maxBufferSize)
+
+	ops.RegisterReporter(func(failure error, ctx map[string]interface{}) {
+		values := map[string]Val{}
+		if failure != nil {
+			values["error_count"] = Float(1)
+		} else {
+			values["success_count"] = Float(1)
+		}
+
+		reportErr := reportToBorda(values, ctx)
+		if reportErr != nil {
+			log.Errorf("Error reporting error to borda: %v", reportErr)
+		}
+	})
 }
 
 // ReducingSubmitter returns a Submitter whose measurements are reduced based on
