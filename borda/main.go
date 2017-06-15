@@ -14,7 +14,7 @@ import (
 
 	"github.com/getlantern/borda"
 	"github.com/getlantern/golog"
-	gredis "github.com/getlantern/redis"
+	"github.com/getlantern/tlsredis"
 	"github.com/getlantern/zenodb/rpc/server"
 	"github.com/getlantern/zenodb/web"
 	"github.com/gorilla/mux"
@@ -66,7 +66,7 @@ func main() {
 	var redisClient *redis.Client
 	if *redisAddr != "" {
 		var redisErr error
-		redisClient, redisErr = gredis.NewClient(&gredis.Opts{
+		redisClient, redisErr = tlsredis.GetClient(&tlsredis.Options{
 			RedisURL:       *redisAddr,
 			RedisCAFile:    *redisCA,
 			ClientPKFile:   *redisClientPK,

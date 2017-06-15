@@ -7,6 +7,7 @@ import:
   - assert
 - package: github.com/vharitonsky/iniflags
 - package: github.com/getlantern/errors
+- package: github.com/getlantern/tlsredis
 - package: golang.org/x/net
   vcs: git
   repo: https://github.com/golang/net
