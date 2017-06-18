@@ -146,7 +146,12 @@ func DefaultClient(batchInterval time.Duration, maxBufferSize int) *Client {
 				return nil, dialErr
 			}
 			tlsConn := tls.Client(conn, clientTLSConfig)
-			return tlsConn, tlsConn.Handshake()
+			handshakeErr := tlsConn.Handshake()
+			if handshakeErr != nil {
+				log.Errorf("Error TLS handshaking with borda: %v", handshakeErr)
+				conn.Close()
+			}
+			return tlsConn, handshakeErr
 		},
 	})
 	if err != nil {
