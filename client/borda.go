@@ -141,6 +141,7 @@ func DefaultClient(batchInterval time.Duration, maxBufferSize int) *Client {
 
 	rc, err := rpc.Dial("borda.getlantern.org:17712", &rpc.ClientOpts{
 		Dialer: func(addr string, timeout time.Duration) (net.Conn, error) {
+			log.Debug("Dialing borda with gRPC")
 			conn, dialErr := net.DialTimeout("tcp", addr, timeout)
 			if dialErr != nil {
 				return nil, dialErr
