@@ -131,7 +131,8 @@ func main() {
 	h := &borda.Handler{Save: s, SampleRate: *sampleRate}
 	go h.Report()
 	router := mux.NewRouter()
-	router.Handle("/measurements", h)
+	router.Handle("/measurements", http.HandlerFunc(h.Measurements))
+	router.Handle("/ping", http.HandlerFunc(h.Ping))
 	err = web.Configure(db, router, &web.Opts{
 		OAuthClientID:     *oauthClientID,
 		OAuthClientSecret: *oauthClientSecret,

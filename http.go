@@ -28,7 +28,7 @@ type Handler struct {
 }
 
 // ServeHTTP implements the http.Handler interface and supports publishing measurements via HTTP.
-func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
+func (h *Handler) Measurements(resp http.ResponseWriter, req *http.Request) {
 	if h.SampleRate == 0 {
 		h.SampleRate = 1
 	}
@@ -86,6 +86,12 @@ func (h *Handler) ServeHTTP(resp http.ResponseWriter, req *http.Request) {
 	}
 
 	resp.WriteHeader(http.StatusCreated)
+}
+
+func (h *Handler) Ping(resp http.ResponseWriter, req *http.Request) {
+	// this is just a ping, ignore the body and always return a 202
+	resp.WriteHeader(http.StatusAccepted)
+	return
 }
 
 func (h *Handler) Report() {
