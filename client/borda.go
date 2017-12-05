@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/getlantern/errors"
 	"github.com/getlantern/golog"
 	"github.com/getlantern/ops"
@@ -84,6 +85,7 @@ type Client struct {
 	buffers      map[int]map[string]*Measurement
 	submitters   map[int]submitter
 	nextBufferID int
+	bytesSent    int
 	mx           sync.Mutex
 }
 
@@ -313,8 +315,9 @@ func (c *Client) doSendBatchHTTP(batchByName map[string][]*Measurement) (int, er
 	buf := bufferPool.Get()
 	defer bufferPool.Put(buf)
 	err := json.NewEncoder(buf).Encode(batch)
+	batchBytes := buf.Len()
 	if err != nil {
-		return 0, log.Errorf("Unable to report measurements: %v", err)
+		return 0, log.Errorf("Unable to encode measurements for reporting: %v", err)
 	}
 
 	req, decErr := http.NewRequest(http.MethodPost, bordaURL, buf)
@@ -331,6 +334,8 @@ func (c *Client) doSendBatchHTTP(batchByName map[string][]*Measurement) (int, er
 
 	switch resp.StatusCode {
 	case 201:
+		c.bytesSent += batchBytes
+		log.Debugf("Sent %v to borda, cumulatively %v", humanize.Bytes(uint64(batchBytes)), humanize.Bytes(uint64(c.bytesSent)))
 		return numInserted, nil
 	case 400:
 		errorMsg, err := ioutil.ReadAll(resp.Body)
