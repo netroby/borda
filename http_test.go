@@ -64,7 +64,7 @@ func TestHTTPRoundTrip(t *testing.T) {
 		return nil
 	}
 	h := &Handler{Save: s}
-	go http.Serve(hl, h)
+	go http.Serve(hl, http.HandlerFunc(h.Measurements))
 
 	resp, _ := httpRequest(httpAddr, badContentType, []*Measurement{good})
 	assert.Equal(t, http.StatusUnsupportedMediaType, resp.StatusCode)
