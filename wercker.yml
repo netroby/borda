@@ -18,6 +18,10 @@ build:
     - wercker/setup-go-workspace:
       package-dir: github.com/getlantern/borda
     - script:
+      name: glide install
+      code: |
+        curl https://glide.sh/get | sh
+    - script:
       name: glide up
       code: |
         glide up
