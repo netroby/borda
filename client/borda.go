@@ -22,7 +22,7 @@ import (
 var (
 	log = golog.LoggerFor("borda.client")
 
-	bordaURL = "https://borda.getlantern.org/measurements"
+	bordaURL = "https://borda.lantern.io/measurements"
 
 	bufferPool = bpool.NewBufferPool(100)
 )
@@ -125,7 +125,7 @@ func NewClient(opts *Options) *Client {
 	return b
 }
 
-// DefaultClient creates a new Client that connects to borda.getlantern.org
+// DefaultClient creates a new Client that connects to borda.lantern.io
 // using gRPC if possible, or falling back to HTTPS if it can't dial out with
 // gRPC.
 func DefaultClient(batchInterval time.Duration, maxBufferSize int) *Client {
@@ -137,11 +137,11 @@ func DefaultClient(batchInterval time.Duration, maxBufferSize int) *Client {
 
 	clientSessionCache := tls.NewLRUClientSessionCache(10000)
 	clientTLSConfig := &tls.Config{
-		ServerName:         "borda.getlantern.org",
+		ServerName:         "borda.lantern.io",
 		ClientSessionCache: clientSessionCache,
 	}
 
-	rc, err := rpc.Dial("borda.getlantern.org:17712", &rpc.ClientOpts{
+	rc, err := rpc.Dial("borda.lantern.io:17712", &rpc.ClientOpts{
 		Dialer: func(addr string, timeout time.Duration) (net.Conn, error) {
 			log.Debug("Dialing borda with gRPC")
 			conn, dialErr := net.DialTimeout("tcp", addr, timeout)

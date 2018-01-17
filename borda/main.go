@@ -97,7 +97,7 @@ func main() {
 	tlsConfig := &tls.Config{
 		GetCertificate: func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 			origServerName := hello.ServerName
-			if origServerName == "d157vud77ygy87.cloudfront.net" || origServerName == "" {
+			if origServerName == "d157vud77ygy87.cloudfront.net" || origServerName == "borda.lantern.io" || origServerName == "" {
 				// Return the borda.getlantern.org cert for domain-fronted requests or requests without SNI
 				hello.ServerName = "borda.getlantern.org"
 			} else if origServerName != "borda.getlantern.org" {
@@ -131,6 +131,7 @@ func main() {
 	h := &borda.Handler{Save: s, SampleRate: *sampleRate}
 	go h.Report()
 	router := mux.NewRouter()
+	router.Use(borda.ForceCDN)
 	router.Handle("/measurements", http.HandlerFunc(h.Measurements))
 	router.Handle("/ping", http.HandlerFunc(h.Ping))
 	err = web.Configure(db, router, &web.Opts{

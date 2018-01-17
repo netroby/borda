@@ -106,6 +106,19 @@ func (h *Handler) Report() {
 	}
 }
 
+// ForceCDN ensures that Get requests came through a CDN
+func ForceCDN(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(resp http.ResponseWriter, req *http.Request) {
+		if req.Method == http.MethodGet && req.Header.Get("Cf-Connecting-Ip") == "" && req.Header.Get("Cloudfront-Forwarded-Proto") == "" {
+			// This didn't come through a CDN, redirect to CloudFlare
+			req.URL.Host = "borda.lantern.io"
+			http.Redirect(resp, req, req.URL.String(), http.StatusMovedPermanently)
+			return
+		}
+		h.ServeHTTP(resp, req)
+	})
+}
+
 func badRequest(resp http.ResponseWriter, msg string, args ...interface{}) {
 	resp.WriteHeader(http.StatusBadRequest)
 	fmt.Fprintf(resp, msg+"\n", args...)
