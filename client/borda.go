@@ -106,7 +106,6 @@ func NewClient(opts *Options) *Client {
 					ClientSessionCache: tls.NewLRUClientSessionCache(100),
 				},
 			},
-			Timeout: time.Second * 10,
 		}
 	}
 	if opts.BeforeSubmit == nil {
