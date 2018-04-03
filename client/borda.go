@@ -68,7 +68,7 @@ type Options struct {
 
 	// BeforeSubmit is an optional callback that gets called before submitting a
 	// batch to borda. The callback should not modify the values and dimensions.
-	BeforeSubmit func(name string, key string, ts time.Time, values map[string]Val, dimensions map[string]interface{})
+	BeforeSubmit func(name string, ts time.Time, values map[string]Val, dimensionsJSON []byte)
 }
 
 // Submitter is a functon that submits measurements to borda. If the measurement
@@ -109,7 +109,7 @@ func NewClient(opts *Options) *Client {
 		}
 	}
 	if opts.BeforeSubmit == nil {
-		opts.BeforeSubmit = func(name string, key string, ts time.Time, values map[string]Val, dimensions map[string]interface{}) {
+		opts.BeforeSubmit = func(name string, ts time.Time, values map[string]Val, dimensionsJSON []byte) {
 		}
 	}
 
@@ -246,7 +246,6 @@ func (c *Client) ReducingSubmitter(name string, maxBufferSize int) Submitter {
 		}
 		key := string(jsonDimensions)
 		ts := time.Now()
-		c.options.BeforeSubmit(name, key, ts, values, dimensions)
 		c.mx.Lock()
 		err := submitter(key, ts, values, dimensions, jsonDimensions)
 		c.mx.Unlock()
@@ -297,6 +296,11 @@ func (c *Client) Flush() {
 }
 
 func (c *Client) doSendBatch(batch map[string][]*Measurement) (int, error) {
+	for _, measurements := range batch {
+		for _, m := range measurements {
+			c.options.BeforeSubmit(m.Name, m.Ts, m.Values, m.Dimensions)
+		}
+	}
 	if c.rc != nil {
 		log.Debug("Sending batch with RPC")
 		return c.doSendBatchRPC(batch)
