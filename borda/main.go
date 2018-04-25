@@ -27,28 +27,31 @@ import (
 var (
 	log = golog.LoggerFor("borda")
 
-	dbdir              = flag.String("dbdir", "zenodata", "The directory in which to place the database files, defaults to 'zenodata'")
-	httpsaddr          = flag.String("httpsaddr", ":443", "The address at which to listen for HTTPS connections")
-	cliaddr            = flag.String("cliaddr", "localhost:17712", "The address at which to listen for gRPC cli connections, defaults to localhost:17712")
-	pprofAddr          = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
-	cookieHashKey      = flag.String("cookiehashkey", "9Cb7CqeP3PVSQv7nq6B9XUaQmjXeA4RUHQctywefW7gu9fmc4wSPY7AVzhA9497H", "key to use for HMAC authentication of web auth cookies, should be 64 bytes, defaults to random 64 bytes if not specified")
-	cookieBlockKey     = flag.String("cookieblockkey", "BtRxmTBveQUcX8ZYdfnrCN2mUB7z2juP", "key to use for encrypting web auth cookies, should be 32 bytes, defaults to random 32 bytes if not specified")
-	oauthClientID      = flag.String("oauthclientid", "2780eb96d3834a26ebc2", "id to use for oauth client to connect to GitHub")
-	oauthClientSecret  = flag.String("oauthclientsecret", "da57775e1c2d7956a50e81501491eabe48d45c14", "secret id to use for oauth client to connect to GitHub")
-	gitHubOrg          = flag.String("githuborg", "getlantern", "the GitHug org against which web users are authenticated")
-	ispdb              = flag.String("ispdb", "", "In order to enable ISP functions, point this to a maxmind ISP database file")
-	aliasesFile        = flag.String("aliases", "aliases.props", "Optionally specify the path to a file containing expression aliases in the form alias=template(%v,%v) with one alias per line")
-	sampleRate         = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
-	password           = flag.String("password", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
-	maxWALSize         = flag.Int("maxwalsize", 1024*1024*1024, "Maximum size of WAL segments on disk. Defaults to 1 GB.")
-	walCompressionSize = flag.Int("walcompressionsize", 30*1024*1024, "Size above which to start compressing WAL segments with snappy. Defaults to 30 MB.")
-	numPartitions      = flag.Int("numpartitions", 1, "The number of partitions available to distribute amongst followers")
-	redisAddr          = flag.String("redis", "", "Redis address in \"redis[s]://host:port\" format")
-	redisCA            = flag.String("redisca", "", "Certificate for redislabs's CA")
-	redisClientPK      = flag.String("redisclientpk", "", "Private key for authenticating client to redis's stunnel")
-	redisClientCert    = flag.String("redisclientcert", "", "Certificate for authenticating client to redis's stunnel")
-	redisCacheSize     = flag.Int("rediscachesize", 50000, "Configures the maximum size of redis caches for HGET operations, defaults to 50,000 per hash")
-	queryTimeout       = flag.Duration("querytimeout", 1*time.Hour, "Configures the timeout for web queries, defaults to 1 hour")
+	dbdir                    = flag.String("dbdir", "zenodata", "The directory in which to place the database files, defaults to 'zenodata'")
+	httpsaddr                = flag.String("httpsaddr", ":443", "The address at which to listen for HTTPS connections")
+	cliaddr                  = flag.String("cliaddr", "localhost:17712", "The address at which to listen for gRPC cli connections, defaults to localhost:17712")
+	pprofAddr                = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
+	cookieHashKey            = flag.String("cookiehashkey", "9Cb7CqeP3PVSQv7nq6B9XUaQmjXeA4RUHQctywefW7gu9fmc4wSPY7AVzhA9497H", "key to use for HMAC authentication of web auth cookies, should be 64 bytes, defaults to random 64 bytes if not specified")
+	cookieBlockKey           = flag.String("cookieblockkey", "BtRxmTBveQUcX8ZYdfnrCN2mUB7z2juP", "key to use for encrypting web auth cookies, should be 32 bytes, defaults to random 32 bytes if not specified")
+	oauthClientID            = flag.String("oauthclientid", "2780eb96d3834a26ebc2", "id to use for oauth client to connect to GitHub")
+	oauthClientSecret        = flag.String("oauthclientsecret", "da57775e1c2d7956a50e81501491eabe48d45c14", "secret id to use for oauth client to connect to GitHub")
+	gitHubOrg                = flag.String("githuborg", "getlantern", "the GitHug org against which web users are authenticated")
+	ispdb                    = flag.String("ispdb", "", "In order to enable ISP functions, point this to a maxmind ISP database file")
+	aliasesFile              = flag.String("aliases", "aliases.props", "Optionally specify the path to a file containing expression aliases in the form alias=template(%v,%v) with one alias per line")
+	sampleRate               = flag.Float64("samplerate", 0.2, "The sample rate (0.2 = 20%)")
+	password                 = flag.String("password", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
+	maxWALSize               = flag.Int("maxwalsize", 1024*1024*1024, "Maximum size of WAL segments on disk. Defaults to 1 GB.")
+	walCompressionSize       = flag.Int("walcompressionsize", 30*1024*1024, "Size above which to start compressing WAL segments with snappy. Defaults to 30 MB.")
+	numPartitions            = flag.Int("numpartitions", 1, "The number of partitions available to distribute amongst followers")
+	redisAddr                = flag.String("redis", "", "Redis address in \"redis[s]://host:port\" format")
+	redisCA                  = flag.String("redisca", "", "Certificate for redislabs's CA")
+	redisClientPK            = flag.String("redisclientpk", "", "Private key for authenticating client to redis's stunnel")
+	redisClientCert          = flag.String("redisclientcert", "", "Certificate for authenticating client to redis's stunnel")
+	redisCacheSize           = flag.Int("rediscachesize", 50000, "Configures the maximum size of redis caches for HGET operations, defaults to 50,000 per hash")
+	webQueryCacheTTL         = flag.Duration("webquerycachettl", 2*time.Hour, "specifies how long to cache web query results")
+	webQueryTimeout          = flag.Duration("webquerytimeout", 30*time.Minute, "time out web queries after this duration")
+	webQueryConcurrencyLimit = flag.Int("webqueryconcurrency", 2, "limit concurrent web queries to this (subsequent queries will be queued)")
+	webMaxResponseBytes      = flag.Int("webquerymaxresponsebytes", 25*1024*1024, "limit the size of query results returned through the web API")
 )
 
 func main() {
@@ -135,14 +138,17 @@ func main() {
 	router.Handle("/measurements", http.HandlerFunc(h.Measurements))
 	router.Handle("/ping", http.HandlerFunc(h.Ping))
 	err = web.Configure(db, router, &web.Opts{
-		OAuthClientID:     *oauthClientID,
-		OAuthClientSecret: *oauthClientSecret,
-		GitHubOrg:         *gitHubOrg,
-		HashKey:           *cookieHashKey,
-		BlockKey:          *cookieBlockKey,
-		Password:          *password,
-		CacheDir:          filepath.Join(*dbdir, "_webcache"),
-		QueryTimeout:      *queryTimeout,
+		OAuthClientID:         *oauthClientID,
+		OAuthClientSecret:     *oauthClientSecret,
+		GitHubOrg:             *gitHubOrg,
+		HashKey:               *cookieHashKey,
+		BlockKey:              *cookieBlockKey,
+		Password:              *password,
+		CacheDir:              filepath.Join(*dbdir, "_webcache"),
+		CacheTTL:              *webQueryCacheTTL,
+		QueryTimeout:          *webQueryTimeout,
+		QueryConcurrencyLimit: *webQueryConcurrencyLimit,
+		MaxResponseBytes:      *webMaxResponseBytes,
 	})
 	if err != nil {
 		panic(fmt.Errorf("Unable to configure web: %v", err))
