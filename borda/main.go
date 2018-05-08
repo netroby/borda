@@ -102,15 +102,19 @@ func main() {
 	}
 	tlsConfig := &tls.Config{
 		GetCertificate: func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			log.Debugf("Got TLS Client Hello from: %v", hello.Conn.RemoteAddr())
 			origServerName := hello.ServerName
+			log.Debugf("Original Server Name: %v", origServerName)
 			if origServerName == *domainFrontedServerName || origServerName == *httpsServerName || origServerName == "" {
 				// Return the grpcServerName cert for domain-fronted requests, requests
 				// the the httpsServerName (from CDN) or requests without SNI.
 				hello.ServerName = *grpcServerName
+				log.Debugf("Using %v instead of origServerName", *grpcServerName)
 			} else if origServerName != *grpcServerName {
 				log.Debugf("Unexpected server name: %v", origServerName)
 			}
 			cert, certErr := m.GetCertificate(hello)
+			log.Debugf("Cert error? %v", certErr)
 			hello.ServerName = origServerName
 			return cert, certErr
 		},
