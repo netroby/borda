@@ -52,6 +52,8 @@ var (
 	webQueryTimeout          = flag.Duration("webquerytimeout", 30*time.Minute, "time out web queries after this duration")
 	webQueryConcurrencyLimit = flag.Int("webqueryconcurrency", 2, "limit concurrent web queries to this (subsequent queries will be queued)")
 	webMaxResponseBytes      = flag.Int("webquerymaxresponsebytes", 25*1024*1024, "limit the size of query results returned through the web API")
+	httpsServerName          = flag.String("httpsservername", "borda.lantern.io", "the server name used for https connections")
+	grpcServerName           = flag.String("grpcservername", "borda.getlantern.org", "the server name used for grpc connection")
 )
 
 func main() {
@@ -100,10 +102,10 @@ func main() {
 	tlsConfig := &tls.Config{
 		GetCertificate: func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 			origServerName := hello.ServerName
-			if origServerName == "d157vud77ygy87.cloudfront.net" || origServerName == "borda.lantern.io" || origServerName == "" {
+			if origServerName == "d157vud77ygy87.cloudfront.net" || origServerName == *grpcServerName || origServerName == "" {
 				// Return the borda.getlantern.org cert for domain-fronted requests or requests without SNI
-				hello.ServerName = "borda.getlantern.org"
-			} else if origServerName != "borda.getlantern.org" {
+				hello.ServerName = *httpsServerName
+			} else if origServerName != *httpsServerName {
 				log.Debugf("Unexpected server name: %v", origServerName)
 			}
 			cert, certErr := m.GetCertificate(hello)
