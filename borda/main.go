@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -28,6 +29,7 @@ var (
 	log = golog.LoggerFor("borda")
 
 	dbdir                    = flag.String("dbdir", "zenodata", "The directory in which to place the database files, defaults to 'zenodata'")
+	httpaddr                 = flag.String("httpaddr", ":80", "The address at which to listen for HTTP connections (only used for LetsEncrypt http-01 challenges)")
 	httpsaddr                = flag.String("httpsaddr", ":443", "The address at which to listen for HTTPS connections")
 	cliaddr                  = flag.String("cliaddr", "localhost:17712", "The address at which to listen for gRPC cli connections, defaults to localhost:17712")
 	pprofAddr                = flag.String("pprofaddr", "localhost:4000", "if specified, will listen for pprof connections at the specified tcp address")
@@ -121,11 +123,17 @@ func main() {
 		PreferServerCipherSuites: true,
 		SessionTicketKey:         getSessionTicketKey(),
 	}
-	hl, err := tls.Listen("tcp", *httpsaddr, tlsConfig)
+	hls, err := tls.Listen("tcp", *httpsaddr, tlsConfig)
 	if err != nil {
 		log.Fatalf("Unable to listen HTTPS: %v", err)
 	}
-	fmt.Fprintf(os.Stdout, "Listening for HTTPS connections at %v\n", hl.Addr())
+	fmt.Fprintf(os.Stdout, "Listening for HTTPS connections at %v\n", hls.Addr())
+
+	hl, err := net.Listen("tcp", *httpaddr)
+	if err != nil {
+		log.Fatalf("Unable to listen HTTP: %v", err)
+	}
+	fmt.Fprintf(os.Stdout, "Listening for HTTP connections at %v\n", hl.Addr())
 
 	if *cliaddr != "" {
 		cl, listenErr := tls.Listen("tcp", *cliaddr, tlsConfig)
@@ -162,10 +170,20 @@ func main() {
 		panic(fmt.Errorf("Unable to configure web: %v", err))
 	}
 	hs := &http.Server{
+		Handler:        m.HTTPHandler(nil),
+		MaxHeaderBytes: 1 << 19,
+	}
+	go func() {
+		err := hs.Serve(hl)
+		if err != nil {
+			log.Fatalf("Unable to serve HTTP traffic: %v", err)
+		}
+	}()
+	hss := &http.Server{
 		Handler:        router,
 		MaxHeaderBytes: 1 << 19,
 	}
-	serverErr := hs.Serve(hl)
+	serverErr := hss.Serve(hls)
 	if serverErr != nil {
 		log.Fatalf("Error serving HTTPS: %v", serverErr)
 	}
