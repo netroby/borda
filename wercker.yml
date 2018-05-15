@@ -18,13 +18,13 @@ build:
     - wercker/setup-go-workspace:
       package-dir: github.com/getlantern/borda
     - script:
-      name: glide install
+      name: dep install
       code: |
-        curl https://glide.sh/get | sh
+        curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
     - script:
-      name: glide up
+      name: dep ensure
       code: |
-        glide up
+        dep ensure
     # Build the project
     - script:
       name: go build
