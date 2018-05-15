@@ -145,7 +145,7 @@ func main() {
 	h := &borda.Handler{Save: s, SampleRate: *sampleRate}
 	go h.Report()
 	router := mux.NewRouter()
-	router.Use(borda.ForceCDN)
+	router.Use(borda.ForceCDN(*httpsServerName))
 	router.Handle("/measurements", http.HandlerFunc(h.Measurements))
 	router.Handle("/ping", http.HandlerFunc(h.Ping))
 	err = web.Configure(db, router, &web.Opts{
