@@ -45,6 +45,7 @@ var (
 	maxWALSize               = flag.Int("maxwalsize", 1024*1024*1024, "Maximum size of WAL segments on disk. Defaults to 1 GB.")
 	walCompressionSize       = flag.Int("walcompressionsize", 30*1024*1024, "Size above which to start compressing WAL segments with snappy. Defaults to 30 MB.")
 	numPartitions            = flag.Int("numpartitions", 1, "The number of partitions available to distribute amongst followers")
+	clusterQueryConcurrency  = flag.Int("clusterqueryconcurrency", 1000, "specifies the maximum concurrency for clustered queries")
 	redisAddr                = flag.String("redis", "", "Redis address in \"redis[s]://host:port\" format")
 	redisCA                  = flag.String("redisca", "", "Certificate for redislabs's CA")
 	redisClientPK            = flag.String("redisclientpk", "", "Private key for authenticating client to redis's stunnel")
@@ -87,7 +88,7 @@ func main() {
 		}
 	}
 
-	s, db, err := borda.TDBSave(*dbdir, "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALSize, *walCompressionSize, *numPartitions)
+	s, db, err := borda.TDBSave(*dbdir, "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALSize, *walCompressionSize, *numPartitions, *clusterQueryConcurrency)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}

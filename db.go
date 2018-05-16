@@ -10,7 +10,7 @@ import (
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
-func TDBSave(dir string, schemaFile string, aliasesFile string, ispdb string, redisClient *redis.Client, redisCacheSize int, maxWALSize int, walCompressionSize int, numPartitions int) (SaveFunc, *zenodb.DB, error) {
+func TDBSave(dir string, schemaFile string, aliasesFile string, ispdb string, redisClient *redis.Client, redisCacheSize int, maxWALSize int, walCompressionSize int, numPartitions int, clusterQueryConcurrency int) (SaveFunc, *zenodb.DB, error) {
 	var ispProvider isp.Provider
 	var ispErr error
 	if ispdb != "" {
@@ -22,18 +22,19 @@ func TDBSave(dir string, schemaFile string, aliasesFile string, ispdb string, re
 	}
 
 	db, err := zenodb.NewDB(&zenodb.DBOpts{
-		Dir:                dir,
-		SchemaFile:         schemaFile,
-		AliasesFile:        aliasesFile,
-		EnableGeo:          true,
-		ISPProvider:        ispProvider,
-		RedisClient:        redisClient,
-		RedisCacheSize:     redisCacheSize,
-		WALSyncInterval:    5 * time.Second,
-		MaxWALSize:         maxWALSize,
-		WALCompressionSize: walCompressionSize,
-		Passthrough:        true,
-		NumPartitions:      numPartitions,
+		Dir:                     dir,
+		SchemaFile:              schemaFile,
+		AliasesFile:             aliasesFile,
+		EnableGeo:               true,
+		ISPProvider:             ispProvider,
+		RedisClient:             redisClient,
+		RedisCacheSize:          redisCacheSize,
+		WALSyncInterval:         5 * time.Second,
+		MaxWALSize:              maxWALSize,
+		WALCompressionSize:      walCompressionSize,
+		Passthrough:             true,
+		NumPartitions:           numPartitions,
+		ClusterQueryConcurrency: clusterQueryConcurrency,
 	})
 	if err != nil {
 		return nil, nil, err
