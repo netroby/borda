@@ -10,7 +10,7 @@ import (
 )
 
 // TDBSave creates a SaveFN that saves to an embedded tdb.DB
-func TDBSave(dir string, schemaFile string, aliasesFile string, ispdb string, redisClient *redis.Client, redisCacheSize int, maxWALSize int, walCompressionSize int, numPartitions int, clusterQueryConcurrency int) (SaveFunc, *zenodb.DB, error) {
+func TDBSave(dir string, schemaFile string, aliasesFile string, ispdb string, redisClient *redis.Client, redisCacheSize int, maxWALSize int, walCompressionSize int, numPartitions int, clusterQueryConcurrency int, maxMemory float64) (SaveFunc, *zenodb.DB, error) {
 	var ispProvider isp.Provider
 	var ispErr error
 	if ispdb != "" {
@@ -32,6 +32,7 @@ func TDBSave(dir string, schemaFile string, aliasesFile string, ispdb string, re
 		WALSyncInterval:         5 * time.Second,
 		MaxWALSize:              maxWALSize,
 		WALCompressionSize:      walCompressionSize,
+		MaxMemoryRatio:          maxMemory,
 		Passthrough:             true,
 		NumPartitions:           numPartitions,
 		ClusterQueryConcurrency: clusterQueryConcurrency,

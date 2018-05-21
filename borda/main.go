@@ -44,8 +44,9 @@ var (
 	password                 = flag.String("password", "GCKKjRHYxfeDaNhPmJnUs9cY3ewaHb", "The authentication token for accessing reports")
 	maxWALSize               = flag.Int("maxwalsize", 1024*1024*1024, "Maximum size of WAL segments on disk. Defaults to 1 GB.")
 	walCompressionSize       = flag.Int("walcompressionsize", 30*1024*1024, "Size above which to start compressing WAL segments with snappy. Defaults to 30 MB.")
+	maxMemory                = flag.Float64("maxmemory", 0.7, "Set to a non-zero value to cap the total size of the process as a percentage of total system memory. Defaults to 0.7 = 70%.")
 	numPartitions            = flag.Int("numpartitions", 1, "The number of partitions available to distribute amongst followers")
-	clusterQueryConcurrency  = flag.Int("clusterqueryconcurrency", 1000, "specifies the maximum concurrency for clustered queries")
+	clusterQueryConcurrency  = flag.Int("clusterqueryconcurrency", 100, "specifies the maximum concurrency for clustered queries")
 	redisAddr                = flag.String("redis", "", "Redis address in \"redis[s]://host:port\" format")
 	redisCA                  = flag.String("redisca", "", "Certificate for redislabs's CA")
 	redisClientPK            = flag.String("redisclientpk", "", "Private key for authenticating client to redis's stunnel")
@@ -88,7 +89,7 @@ func main() {
 		}
 	}
 
-	s, db, err := borda.TDBSave(*dbdir, "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALSize, *walCompressionSize, *numPartitions, *clusterQueryConcurrency)
+	s, db, err := borda.TDBSave(*dbdir, "schema.yaml", *aliasesFile, *ispdb, redisClient, *redisCacheSize, *maxWALSize, *walCompressionSize, *numPartitions, *clusterQueryConcurrency, *maxMemory)
 	if err != nil {
 		log.Fatalf("Unable to initialize tdb: %v", err)
 	}
