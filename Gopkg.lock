@@ -207,13 +207,14 @@
     "core",
     "encoding",
     "expr",
+    "metrics",
     "planner",
     "rpc",
     "rpc/server",
     "sql",
     "web"
   ]
-  revision = "49042a2feabad07a44bdc7a3e5001f318edd1a2c"
+  revision = "a1da824d98692bc5ad19b99ab03ee6b13d74e95d"
 
 [[projects]]
   branch = "master"
